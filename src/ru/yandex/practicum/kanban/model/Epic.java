@@ -5,10 +5,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Epic extends Task {
-    ArrayList<Integer> subtaskReferences;
+    private ArrayList<Integer> subtaskReferences;
 
-    public Epic(int id, String name, String details, TaskStatus status, ArrayList<Integer> subtaskReferences) {
+    public Epic(int id, String name, String details, TaskStatus status,
+                ArrayList<Integer> subtaskReferences) {
         super(id, name, details, status);
+        this.subtaskReferences = subtaskReferences;
+    }
+
+    public Epic(String name, String details, TaskStatus status,
+                ArrayList<Integer> subtaskReferences) {
+        super(name, details, status);
         this.subtaskReferences = subtaskReferences;
     }
 
@@ -67,7 +74,7 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        return "EPIC:\n" + "ID: " + this.getId() + ";\n" + "NAME: " + this.getName() + ";\n"
+        return this.type + ", ID: " + this.getId() + ";\n" + "NAME: " + this.getName() + ";\n"
                 + "DESCRIPTION: " + this.getDetails() + ";\n"
                 + "STATUS: " + this.getStatus() + ";\n" + "SUBTASKS: " + subtaskReferences;
     }

@@ -3,11 +3,19 @@ package ru.yandex.practicum.kanban.model;
 import ru.yandex.practicum.kanban.service.TaskStatus;
 
 public class Subtask extends Task {
-    int epicReference;
+    private int epicReference;
 
     public Subtask(int id, String name, String details, TaskStatus status, int epicReference) {
         super(id, name, details, status);
         this.epicReference = epicReference;
+    }
+
+    public Subtask(String name, String details, TaskStatus status, int epicReference) {
+        super(name, details, status);
+        this.epicReference = epicReference;
+    }
+
+    public Subtask() {
     }
 
     public int getEpicReference() {
@@ -33,7 +41,7 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return "SUBTASK: ID: " + this.getId() + ";\n" + "NAME: " + this.getName() + ";\n"
+        return this.type + ", ID: " + this.getId() + ";\n" + "NAME: " + this.getName() + ";\n"
                 + "DESCRIPTION: " + this.getDetails() + ";\n"
                 + "STATUS: " + this.getStatus() + ";\n" + "EPIC's ID: " + epicReference ;
     }

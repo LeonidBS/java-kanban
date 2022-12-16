@@ -1,6 +1,8 @@
 package ru.yandex.practicum.kanban.model;
 
 import ru.yandex.practicum.kanban.service.TaskStatus;
+import ru.yandex.practicum.kanban.service.TaskType;
+
 import java.util.Objects;
 
 public class Task {
@@ -8,6 +10,7 @@ public class Task {
     private String name;
     private String details;
     private TaskStatus status;
+    public TaskType type;
 
 
     public Task(int id, String name, String details, TaskStatus status) {
@@ -15,6 +18,15 @@ public class Task {
         this.name = name;
         this.details = details;
         this.status = status;
+    }
+
+    public Task(String name, String details, TaskStatus status) {
+        this.name = name;
+        this.details = details;
+        this.status = status;
+    }
+
+    public Task() {
     }
 
     public String getName() {
@@ -33,6 +45,14 @@ public class Task {
         return status;
     }
 
+    public TaskType getTaskType() {
+        return type;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -45,6 +65,10 @@ public class Task {
         this.status = status;
     }
 
+    public void setTaskType(TaskType type) {
+        this.type = type;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -55,7 +79,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return "SIMPLE TASK:\n" + "ID: " + id + ";\n" + "NAME: " + name + ";\n"
+        return type + ", ID: " + id + ";\n" + "NAME: " + name + ";\n"
                 + "DESCRIPTION: " + details + ";\n"
                 + "STATUS: " + status;
     }
