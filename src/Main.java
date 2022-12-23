@@ -12,6 +12,7 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         TaskManager inMemoryTaskManager =  Manager.getDefault();
 
+        System.out.println("Поехали!");
         System.out.println("Запускаем тест...\n");
 
         System.out.println("Добавление различных задач согласно задания на тест\n");
