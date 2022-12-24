@@ -2,8 +2,6 @@ package ru.yandex.practicum.kanban.service;
 
 import ru.yandex.practicum.kanban.model.Task;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {

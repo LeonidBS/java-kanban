@@ -2,9 +2,6 @@ package ru.yandex.practicum.kanban.model;
 
 import ru.yandex.practicum.kanban.service.TaskStatus;
 import ru.yandex.practicum.kanban.service.TaskType;
-
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.Objects;
 
 public class Task {
@@ -72,8 +69,12 @@ public class Task {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Task task = (Task) o;
         return id == task.id && Objects.equals(name, task.name) && Objects.equals(details, task.details) && status == task.status;
     }
