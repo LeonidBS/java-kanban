@@ -3,14 +3,12 @@ package ru.yandex.practicum.kanban.service;
 import ru.yandex.practicum.kanban.model.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {  // README includes some comments about this code implementation
     private int id = 0;
-    private HashMap<Integer, Task> tasks = new HashMap<>();
-    private HashMap<Integer, Epic> epics = new HashMap<>();
-    private HashMap<Integer, Subtask> subtasks = new HashMap<>();
-    private List<Task> viewDate = new ArrayList<>();
+    private final HashMap<Integer, Task> tasks = new HashMap<>();
+    private final HashMap<Integer, Epic> epics = new HashMap<>();
+    private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
 
     public int getId() {
         id++;
@@ -92,6 +90,7 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
         for (Integer idFromTasks : tasks.keySet()) {
             if (id == idFromTasks) {
                 tasks.remove(id);
+                Manager.getDefaultHistory().remove(id);
                 return true;
             }
         }
@@ -102,6 +101,7 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
                     subtasks.remove(subtaskReference);
                 }
                 epics.remove(idFromEpics);
+                Manager.getDefaultHistory().remove(id);
                 return true;
             }
         }
@@ -114,6 +114,7 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
                 for (int i = 0; i < epicSubtaskReferences.size(); i++) {
                     if (epicSubtaskReferences.get(i) == id) {
                         epicSubtaskReferences.remove(i);
+                        Manager.getDefaultHistory().remove(id);
                     }
                 }
                 if (!(epic.epicStatusBySubtask(subtasks).equals(epic.getStatus()))) {
@@ -131,15 +132,13 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
         tasks.clear();
         subtasks.clear();
         epics.clear();
+        Manager.getDefaultHistory().clearHistory();
     }
 
     @Override
-    public ArrayList<Task> obtainCompleteList() {
-       ArrayList<Task> listOfTasks = new ArrayList<>();
+    public ArrayList<Task> retrieveCompleteList() {
+       ArrayList<Task> listOfTasks = new ArrayList<>(tasks.values());
 
-       for (Task task : tasks.values()) {
-            listOfTasks.add(task);
-       }
        for (Epic epic : epics.values()) {
            listOfTasks.add(epic);
            ArrayList<Integer> subtaskReferences = epic.getSubtaskReferences();
@@ -151,8 +150,8 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
     }
 
     @Override
-    public Task obtainTaskById(int id) {
-       ArrayList<Task> listOfTasks = obtainCompleteList();
+    public Task retrieveTaskById(int id) {
+       ArrayList<Task> listOfTasks = retrieveCompleteList();
 
        Task taskReturned = new Task();
         for (Task task : listOfTasks) {
@@ -167,7 +166,7 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
     }
 
     @Override
-    public ArrayList<Subtask> obtainSubtasks(int idEpic) {
+    public ArrayList<Subtask> retrieveSubtasks(int idEpic) {
         ArrayList<Subtask> subtasksByEpic = new ArrayList<>();
         Epic epic = epics.getOrDefault(idEpic, null);
 
@@ -213,7 +212,7 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
 
     @Override
     public String printAll() {
-        ArrayList<Task> listOfTasks = obtainCompleteList();
+        ArrayList<Task> listOfTasks = retrieveCompleteList();
         StringBuilder string = new StringBuilder("\nПечать всех задач\n");
 
         for (Task task : listOfTasks) {
@@ -224,7 +223,7 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
 
     @Override
     public String printSubtasksByEpic(int idEpic) {
-        ArrayList<Subtask> listOfTasks = obtainSubtasks(idEpic);
+        ArrayList<Subtask> listOfTasks = retrieveSubtasks(idEpic);
         StringBuilder string = new StringBuilder("\nПечать подзадач по эпику\n");
 
         for (Subtask subtask : listOfTasks) {

@@ -1,7 +1,5 @@
 package ru.yandex.practicum.kanban.model;
 
-import ru.yandex.practicum.kanban.service.TaskStatus;
-
 public class Subtask extends Task {
     private int epicReference;
 
@@ -13,9 +11,6 @@ public class Subtask extends Task {
     public Subtask(String name, String details, TaskStatus status, int epicReference) {
         super(name, details, status);
         this.epicReference = epicReference;
-    }
-
-    public Subtask() {
     }
 
     public int getEpicReference() {
