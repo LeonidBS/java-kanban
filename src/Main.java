@@ -61,7 +61,7 @@ public class Main {
         System.out.println(inMemoryTaskManager.printAll());
 
         System.out.println("1 - Просмотр задачи \n" +
-                "2 - Добавить автоматически в историю все задачи несколько раз и вывести историю  \n" +
+                "2 - Добавить автоматически в историю все задачи несколько раз  \n" +
                 "3 - История просмотра  \n" +
                 "4 - удалить задачу  \n" +
                 "5 - выход  \n");
@@ -90,11 +90,13 @@ public class Main {
                     System.out.println("Введите номер задачи");
                     int idDelete = scanner.nextInt();
                     System.out.println(inMemoryTaskManager.deleteTask(idDelete));
-                }  if (command == 5) {
+                } else if (command == 5) {
                     break;
+                } else if (command == 6) {
+                    System.out.println(inMemoryTaskManager.printAll());
                 }
                 System.out.println("1 - Просмотр задачи \n" +
-                        "2 - Добавить автоматически в историю 14 задач и вывести историю  \n" +
+                        "2 - Добавить автоматически в историю все задачи несколько раз   \n" +
                         "3 - История просмотра  \n" +
                         "4 - удалить задачу  \n" +
                         "5 - выход  \n");

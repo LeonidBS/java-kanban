@@ -19,12 +19,10 @@ public class Epic extends Task {
     }
 
     public ArrayList<Integer> getSubtaskReferences() {
-        if (subtaskReferences != null) {
-            return subtaskReferences;
-        } else {
+        if (subtaskReferences == null) {
             ArrayList<Integer> subtaskReferences = new ArrayList<>();
-            return subtaskReferences;
         }
+            return subtaskReferences;
     }
 
     public void setSubtaskReferences(ArrayList<Integer> subtaskReferences) {
@@ -73,7 +71,7 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        return this.type + ", ID: " + this.getId() + ";\n" + "NAME: " + this.getName() + ";\n"
+        return this.getTaskType() + ", ID: " + this.getId() + ";\n" + "NAME: " + this.getName() + ";\n"
                 + "DESCRIPTION: " + this.getDetails() + ";\n"
                 + "STATUS: " + this.getStatus() + ";\n" + "SUBTASKS: " + subtaskReferences;
     }

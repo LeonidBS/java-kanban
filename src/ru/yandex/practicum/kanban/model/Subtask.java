@@ -36,7 +36,7 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return this.type + ", ID: " + this.getId() + ";\n" + "NAME: " + this.getName() + ";\n"
+        return this.getTaskType() + ", ID: " + this.getId() + ";\n" + "NAME: " + this.getName() + ";\n"
                 + "DESCRIPTION: " + this.getDetails() + ";\n"
                 + "STATUS: " + this.getStatus() + ";\n" + "EPIC's ID: " + epicReference ;
     }

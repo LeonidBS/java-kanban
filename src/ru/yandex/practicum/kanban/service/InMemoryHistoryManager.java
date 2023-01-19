@@ -6,35 +6,24 @@ import java.util.*;
 
 public class InMemoryHistoryManager implements HistoryManager {
     private final List<Task> viewHistoryList = new ArrayList<>();
-    private final Map<Integer, Integer> tableNodeAddresses = new HashMap<>();
+    private final Map<Integer, Node> tableNodeAddresses = new HashMap<>();
     private Node head = null;
     private Node tail = null;
-    private int size = 1;
-    private Node[] tableNodes = new Node[10];
-
 
     @Override
     public void add(Task task) {
         if  (tableNodeAddresses.getOrDefault(task.getId(), null) != null) {
-            removeNode(tableNodes[tableNodeAddresses.get(task.getId())]);
-            tableNodes[tableNodeAddresses.get(task.getId())] = linkLast(task);
-        } else {
-            tableNodeAddresses.put(task.getId(), size);
-            if (size == tableNodes.length - 1) {
-                resize();
-            }
-            tableNodes[size] = linkLast(task);
-            size++;
+            removeNode(tableNodeAddresses.get(task.getId()));
         }
+            tableNodeAddresses.put(task.getId(), linkLast(task));
     }
 
     @Override
     public void remove(int id) {
-        Node node = tableNodes[tableNodeAddresses.getOrDefault(id, 0)];
+        Node node = tableNodeAddresses.getOrDefault(id, null);
         if (node != null) {
-            tableNodes[tableNodeAddresses.get(id)] = null;
-            tableNodeAddresses.remove(id);
             removeNode(node);
+            tableNodeAddresses.remove(id);
         }
     }
 
@@ -57,10 +46,6 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void clearHistory() {
         tableNodeAddresses.clear();
-        for (Node node : tableNodes) {
-            node = null;
-        }
-        tableNodes = new Node[10];
     }
 
     public Node linkLast(Task task) {
@@ -103,9 +88,5 @@ public class InMemoryHistoryManager implements HistoryManager {
            tail = node.prev;
         }
         node = null;
-    }
-
-    public void resize() {
-         tableNodes = Arrays.copyOf(tableNodes, tableNodes.length * tableNodes.length);
     }
 }

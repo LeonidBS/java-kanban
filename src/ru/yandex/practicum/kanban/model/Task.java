@@ -7,7 +7,7 @@ public class Task {
     private String name;
     private String details;
     private TaskStatus status;
-    public TaskType type;
+    private TaskType type;
 
     public Task(int id, String name, String details, TaskStatus status) {
         this.id = id;
