@@ -4,12 +4,12 @@ public class Subtask extends Task {
     private int epicReference;
 
     public Subtask(int id, String name, String details, TaskStatus status, int epicReference) {
-        super(id, name, details, status);
+        super(id, name, details, status, TaskType.SUBTASK);
         this.epicReference = epicReference;
     }
 
     public Subtask(String name, String details, TaskStatus status, int epicReference) {
-        super(name, details, status);
+        super(name, details, status, TaskType.SUBTASK);
         this.epicReference = epicReference;
     }
 
@@ -40,5 +40,11 @@ public class Subtask extends Task {
                 + "DESCRIPTION: " + this.getDetails() + ";\n"
                 + "STATUS: " + this.getStatus() + ";\n" + "EPIC's ID: " + epicReference ;
     }
+
+    public String toStringInFile() {
+        return this.getId() + ","+ getTaskType() + ",\"" + this.getName() + "\","
+                + this.getStatus() + ",\"" + this.getDetails() + "\"," + epicReference;
+    }
+
 }
 

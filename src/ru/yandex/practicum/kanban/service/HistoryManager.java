@@ -9,4 +9,6 @@ public interface HistoryManager {
     void clearHistory();
     List<Task> getHistory();
     String printHistory();
+    String historyToString();
+    List<Integer> historyFromString(String value);
 }

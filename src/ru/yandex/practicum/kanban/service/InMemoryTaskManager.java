@@ -1,24 +1,42 @@
 package ru.yandex.practicum.kanban.service;
 
 import ru.yandex.practicum.kanban.model.*;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class InMemoryTaskManager implements TaskManager {  // README includes some comments about this code implementation
-    private int id = 0;
-    private final HashMap<Integer, Task> tasks = new HashMap<>();
-    private final HashMap<Integer, Epic> epics = new HashMap<>();
-    private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    private static int id = 0;
+    private static final HashMap<Integer, Task> tasks = new HashMap<>();
+    private static final HashMap<Integer, Epic> epics = new HashMap<>();
+    private static final HashMap<Integer, Subtask> subtasks = new HashMap<>();
 
     public int getId() {
         id++;
         return id;
     }
 
+    public static int getIdWithoutIncrement() {
+        return id;
+    }
+
+    public static void setId(int newID) {
+        id = newID;
+    }
+
+    public static void writingHashFormFile(Task task) {
+        tasks.put(task.getId(), task);
+    }
+    public static void writingHashFormFile(Epic epic) {
+        epics.put(epic.getId(), epic);
+    }
+    public static void writingHashFormFile(Subtask subtask) {
+        subtasks.put(subtask.getId(), subtask);
+    }
+
     @Override
     public int createTask(Task task) {
         task.setId(getId());
-        task.setTaskType(TaskType.SIMPLE_TASK);
         tasks.put(task.getId(), task);
         return task.getId();
     }
@@ -26,7 +44,6 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
     @Override
     public int createTask(Epic epic) {
         epic.setId(getId());
-        epic.setTaskType(TaskType.EPIC);
         epics.put(epic.getId(), epic);
         return epic.getId();
     }
@@ -152,18 +169,16 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
 
     @Override
     public Task retrieveTaskById(int id) {
-       ArrayList<Task> listOfTasks = retrieveCompleteList();
-
-       Task taskReturned = new Task();
-        for (Task task : listOfTasks) {
-             if (task.getId() == id) {
-                 taskReturned = task;
-            }
+        Task task;
+        HashMap<Integer, Task> allTasks = new HashMap<>();
+        allTasks.putAll(tasks);
+        allTasks.putAll(epics);
+        allTasks.putAll(subtasks);
+        task = allTasks.getOrDefault(id, new Task());
+        if (task.getId() != 0)  {
+            Manager.getDefaultHistory().add(task);
         }
-        if (taskReturned.getId() != 0)  {
-            Manager.getDefaultHistory().add(taskReturned);
-        }
-        return taskReturned;
+        return task;
     }
 
     @Override
@@ -231,5 +246,10 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
             string.append(subtask).append("\n");
         }
         return string.toString();
+    }
+
+    @Override
+    public void loadFromFile(Path path) {
+
     }
 }

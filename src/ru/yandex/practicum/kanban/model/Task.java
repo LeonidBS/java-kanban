@@ -16,13 +16,29 @@ public class Task {
         this.status = status;
     }
 
+    public Task(String name, String details, TaskStatus status, TaskType type) {
+        this.name = name;
+        this.details = details;
+        this.status = status;
+        this.type = type;
+    }
+
     public Task(String name, String details, TaskStatus status) {
         this.name = name;
         this.details = details;
         this.status = status;
+        this.type = TaskType.SIMPLE_TASK;
     }
 
     public Task() {
+    }
+
+    public Task(int id, String name, String details, TaskStatus status, TaskType type) {
+        this.id = id;
+        this.name = name;
+        this.details = details;
+        this.status = status;
+        this.type = type;
     }
 
     public String getName() {
@@ -97,7 +113,10 @@ public class Task {
         hash = hash * 31;
         hash +=id;
         return hash;
+    }
 
-
+    public String toStringInFile() {
+        return id + ","+ type + ",\"" + name
+                + "\"," + status + ",\"" + details + "\"";
     }
 }

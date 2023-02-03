@@ -11,6 +11,31 @@ public class InMemoryHistoryManager implements HistoryManager {
     private Node tail = null;
 
     @Override
+    public String historyToString() {
+        List<Task> taskHistory = getTasks();
+        StringBuilder stringHistoryForFile = new StringBuilder();
+        for (int i = 0; i < taskHistory.size(); i++) {
+            stringHistoryForFile.append(taskHistory.get(i).getId());
+            if (i < taskHistory.size() - 1) {
+                stringHistoryForFile.append(",");
+            }
+        }
+        return stringHistoryForFile.toString();
+    }
+
+    @Override
+    public List<Integer> historyFromString(String value) {
+        List<Integer> historyList = new ArrayList<>();
+        String[] historyString = value.split(",");
+        for (int i = 0; i < historyString.length; i++) {
+            historyList.add(Integer.parseInt(historyString[i]));
+            Task task = Manager.getDefault().retrieveTaskById(historyList.get(i));
+            add(task);
+        }
+                return historyList;
+    }
+
+    @Override
     public void add(Task task) {
         if  (tableNodeAddresses.getOrDefault(task.getId(), null) != null) {
             removeNode(tableNodeAddresses.get(task.getId()));

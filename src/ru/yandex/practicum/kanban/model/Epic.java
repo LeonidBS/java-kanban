@@ -8,13 +8,13 @@ public class Epic extends Task {
 
     public Epic(int id, String name, String details, TaskStatus status,
                 ArrayList<Integer> subtaskReferences) {
-        super(id, name, details, status);
+        super(id, name, details, status, TaskType.EPIC);
         this.subtaskReferences = subtaskReferences;
     }
 
     public Epic(String name, String details, TaskStatus status,
                 ArrayList<Integer> subtaskReferences) {
-        super(name, details, status);
+        super(name, details, status, TaskType.EPIC);
         this.subtaskReferences = subtaskReferences;
     }
 
@@ -74,5 +74,10 @@ public class Epic extends Task {
         return this.getTaskType() + ", ID: " + this.getId() + ";\n" + "NAME: " + this.getName() + ";\n"
                 + "DESCRIPTION: " + this.getDetails() + ";\n"
                 + "STATUS: " + this.getStatus() + ";\n" + "SUBTASKS: " + subtaskReferences;
+    }
+
+    public String toStringInFile() {
+        return this.getId() + ","+ getTaskType() + ",\"" + this.getName() + "\"," + this.getStatus() +
+                ",\"" + this.getDetails() + "\",\"subtaskReferences:" + subtaskReferences +"\"";
     }
 }

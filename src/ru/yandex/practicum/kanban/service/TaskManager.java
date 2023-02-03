@@ -3,10 +3,12 @@ package ru.yandex.practicum.kanban.service;
 import ru.yandex.practicum.kanban.model.Epic;
 import ru.yandex.practicum.kanban.model.Subtask;
 import ru.yandex.practicum.kanban.model.Task;
+
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 public interface TaskManager {
-
+    void loadFromFile(Path path);
     int createTask(Task task);
     int createTask(Epic epic);
     int createTask(Subtask subtask);
