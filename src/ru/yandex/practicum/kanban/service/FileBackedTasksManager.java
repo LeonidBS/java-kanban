@@ -1,25 +1,31 @@
 package ru.yandex.practicum.kanban.service;
 
+import ru.yandex.practicum.kanban.exceptions.ManagerSaveException;
 import ru.yandex.practicum.kanban.model.*;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Scanner;
+
 import static ru.yandex.practicum.kanban.model.TaskType.SIMPLE_TASK;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
     private final static Path path = Paths.get("resources\\TasksStorageFile.csv");
     private final static String title = "id,type,name,status,details,special";
+
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        TaskManager fileBackedTasksManager =  Manager.getFileBacked();
+        TaskManager fileBackedTasksManager = Manager.getFileBacked();
 
         System.out.println("Запускаем тест из метода main класса FileBackedTasksManager\n");
 
         System.out.println("Читаем файл\n");
-        fileBackedTasksManager.loadFromFile(path);
+        loadFromFile(path);
         System.out.println("\nПечать всех задач считанный из файла\n");
         System.out.println(fileBackedTasksManager.printAll());
 
@@ -38,7 +44,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         Epic epic = new Epic("ИЗ МЕНЕДЖЕРА, Первый эпик",
                 "Детали первого эпика ИЗ МЕНЕДЖЕРА",
-                TaskStatus.NEW, new ArrayList<>());
+                TaskStatus.NEW);
         newID = fileBackedTasksManager.createTask(epic);
         System.out.println(newID);
 
@@ -54,59 +60,56 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         epic = new Epic("ИЗ МЕНЕДЖЕРА, Второй эпик",
                 "Детали второго эпика ИЗ МЕНЕДЖЕРА",
-                TaskStatus.NEW, new ArrayList<>());
+                TaskStatus.NEW);
         newID = fileBackedTasksManager.createTask(epic);
         System.out.println(newID);
 
         System.out.println("\nПечать всех задач");
         System.out.println(fileBackedTasksManager.printAll());
 
-        System.out.println("1 - Просмотр задачи\n" +
-                "2 - Добавить автоматически в историю все задачи несколько раз\n" +
-                "3 - История просмотра\n" +
-                "4 - удалить задачу\n" +
-                "5 - выход\n");
-        int command = scanner.nextInt();
-
-        while (true) {
-            if (command == 1) {
-                System.out.println("Введите номер задачи");
-                int id = scanner.nextInt();
-                System.out.println(fileBackedTasksManager.retrieveTaskById(id));
-            }
-            if (command == 2) {
-                for (int i = 4; i < 13; i++) {
-                    fileBackedTasksManager.retrieveTaskById(i);
+        try (Scanner scanner = new Scanner(System.in)) {
+            while (true) {
+                System.out.println("1 - Просмотр задачи\n" +
+                        "2 - Добавить автоматически в историю все задачи несколько раз\n" +
+                        "3 - История просмотра\n" +
+                        "4 - удалить задачу\n" +
+                        "5 - выход\n" +
+                        "6 - Вывод всех задач\n");
+                int command = scanner.nextInt();
+                if (command == 1) {
+                    System.out.println("Введите номер задачи");
+                    int id = scanner.nextInt();
+                    System.out.println(fileBackedTasksManager.retrieveTaskById(id));
                 }
-                for (int i = 12; i > 7; i--) {
-                    fileBackedTasksManager.retrieveTaskById(i);
+                if (command == 2) {
+                    for (int i = 4; i < 13; i++) {
+                        fileBackedTasksManager.retrieveTaskById(i);
+                    }
+                    for (int i = 12; i > 7; i--) {
+                        fileBackedTasksManager.retrieveTaskById(i);
+                    }
+                    fileBackedTasksManager.retrieveTaskById(1);
+                    fileBackedTasksManager.retrieveTaskById(13);
+                    //     System.out.println(Manager.getDefaultHistory().printHistory());
+                } else if (command == 3) {
+                    System.out.println(Manager.getDefaultHistory().printHistory());
+                } else if (command == 4) {
+                    System.out.println("Введите номер задачи");
+                    int idDelete = scanner.nextInt();
+                    System.out.println(fileBackedTasksManager.deleteTask(idDelete));
+                } else if (command == 5) {
+                    break;
+                } else if (command == 6) {
+                    System.out.println(fileBackedTasksManager.printAll());
                 }
-                fileBackedTasksManager.retrieveTaskById(1);
-                fileBackedTasksManager.retrieveTaskById(13);
-                //     System.out.println(Manager.getDefaultHistory().printHistory());
-            } else if (command == 3) {
-                System.out.println(Manager.getDefaultHistory().printHistory());
-
-            } else if (command == 4) {
-                System.out.println("Введите номер задачи");
-                int idDelete = scanner.nextInt();
-                System.out.println(fileBackedTasksManager.deleteTask(idDelete));
-            } else if (command == 5) {
-                break;
-            } else if (command == 6) {
-                System.out.println(fileBackedTasksManager.printAll());
             }
-            System.out.println("1 - Просмотр задачи\n" +
-                    "2 - Добавить автоматически в историю все задачи несколько раз\n" +
-                    "3 - История просмотра\n" +
-                    "4 - удалить задачу\n" +
-                    "5 - выход\n" +
-                    "6 - Вывод всех задач\n");
-            command = scanner.nextInt();
+        } catch (InputMismatchException e) {
+            e.printStackTrace();
+            System.out.println("Введите числовое значение из меню");
         }
     }
 
-    public void loadFromFile(Path path) {
+    public static void loadFromFile(Path path) {
         try {
             List<String> taskLines = Files.readAllLines(path);
             int i;
@@ -117,8 +120,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     break;
                 }
             }
-            if (taskLines.get(i).length() == 0) {
-                String historyString = taskLines.get(taskLines.size() - 1);
+            if (taskLines.get(i).length() == 0 & taskLines.get(i + 1).length() > 0) {
+                String historyString = taskLines.get(i + 1);
                 Manager.getDefaultHistory().historyFromString(historyString);
             }
         } catch (IOException e) {
@@ -127,7 +130,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
     }
 
-    public Task fromString(String value) {
+    public static Task fromString(String value) {
         String[] partOfTaskLine = value.split(",");
         int firstIndexName = value.indexOf(partOfTaskLine[2]) + 1;
         int lastIndexName = 0;
@@ -175,12 +178,12 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 int epicReference = Integer.parseInt(partOfTaskLine[partOfTaskLine.length - 1]);
                 int lastIndexOfDetails = partOfTaskLine[partOfTaskLine.length - 1].length() + 1;
                 details = details.substring(0, details.length() - lastIndexOfDetails);
-                return  new Subtask(id, name, details, status, epicReference);
+                return new Subtask(id, name, details, status, epicReference);
         }
         return new Task();
     }
 
-    public void save()  {
+    public void save() {
         List<String> taskLines = new ArrayList<>();
         ArrayList<Task> allTasks = retrieveCompleteList();
         for (Task task : allTasks) {
@@ -193,7 +196,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         try {
             Files.writeString(path, title + "\n");
             for (String taskLine : taskLines) {
-                Files.writeString(path, taskLine + "\n",  StandardOpenOption.APPEND);
+                Files.writeString(path, taskLine + "\n", StandardOpenOption.APPEND);
             }
         } catch (IOException e) {
             e.printStackTrace();

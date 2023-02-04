@@ -1,7 +1,7 @@
 package ru.yandex.practicum.kanban.model;
 
 public class Subtask extends Task {
-    private int epicReference;
+    private final int epicReference;
 
     public Subtask(int id, String name, String details, TaskStatus status, int epicReference) {
         super(id, name, details, status, TaskType.SUBTASK);
@@ -38,11 +38,11 @@ public class Subtask extends Task {
     public String toString() {
         return this.getTaskType() + ", ID: " + this.getId() + ";\n" + "NAME: " + this.getName() + ";\n"
                 + "DESCRIPTION: " + this.getDetails() + ";\n"
-                + "STATUS: " + this.getStatus() + ";\n" + "EPIC's ID: " + epicReference ;
+                + "STATUS: " + this.getStatus() + ";\n" + "EPIC's ID: " + epicReference;
     }
 
     public String toStringInFile() {
-        return this.getId() + ","+ getTaskType() + ",\"" + this.getName() + "\","
+        return this.getId() + "," + getTaskType() + ",\"" + this.getName() + "\","
                 + this.getStatus() + ",\"" + this.getDetails() + "\"," + epicReference;
     }
 

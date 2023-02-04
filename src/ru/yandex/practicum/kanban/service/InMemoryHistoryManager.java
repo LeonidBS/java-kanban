@@ -1,8 +1,12 @@
 package ru.yandex.practicum.kanban.service;
 
-import ru.yandex.practicum.kanban.model.Node;
+import ru.yandex.practicum.kanban.exceptions.Node;
 import ru.yandex.practicum.kanban.model.Task;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class InMemoryHistoryManager implements HistoryManager {
     private final List<Task> viewHistoryList = new ArrayList<>();
@@ -32,15 +36,15 @@ public class InMemoryHistoryManager implements HistoryManager {
             Task task = Manager.getDefault().retrieveTaskById(historyList.get(i));
             add(task);
         }
-                return historyList;
+        return historyList;
     }
 
     @Override
     public void add(Task task) {
-        if  (tableNodeAddresses.getOrDefault(task.getId(), null) != null) {
+        if (tableNodeAddresses.getOrDefault(task.getId(), null) != null) {
             removeNode(tableNodeAddresses.get(task.getId()));
         }
-            tableNodeAddresses.put(task.getId(), linkLast(task));
+        tableNodeAddresses.put(task.getId(), linkLast(task));
     }
 
     @Override
@@ -54,15 +58,15 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public List<Task> getHistory() {
-       return  getTasks();
+        return getTasks();
     }
 
     @Override
     public String printHistory() {
         StringBuilder string = new StringBuilder("\nПечать истории просмотров\n");
         for (int i = 0; i < getHistory().size(); i++) {
-            string.append("№").append(i+1).append("\n");
-           string.append(getHistory().get(i)).append("\n");
+            string.append("№").append(i + 1).append("\n");
+            string.append(getHistory().get(i)).append("\n");
         }
         string.append(getHistory().size()).append("\n");
         return string.toString();
@@ -110,7 +114,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (node.next != null) {
             node.next.prev = node.prev;
         } else {
-           tail = node.prev;
+            tail = node.prev;
         }
         node = null;
     }

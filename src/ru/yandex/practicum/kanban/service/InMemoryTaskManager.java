@@ -1,7 +1,7 @@
 package ru.yandex.practicum.kanban.service;
 
 import ru.yandex.practicum.kanban.model.*;
-import java.nio.file.Path;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -27,9 +27,11 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
     public static void writingHashFormFile(Task task) {
         tasks.put(task.getId(), task);
     }
+
     public static void writingHashFormFile(Epic epic) {
         epics.put(epic.getId(), epic);
     }
+
     public static void writingHashFormFile(Subtask subtask) {
         subtasks.put(subtask.getId(), subtask);
     }
@@ -70,8 +72,6 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
     }
 
 
-
-
     @Override
     public boolean updateTask(Task task) {
         for (Task taskFromHash : tasks.values()) {
@@ -96,7 +96,7 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
                     epic.setTaskType(TaskType.EPIC);
                     epics.put(epic.getId(), epic);
                 }
-            return true;
+                return true;
             }
         }
         return false;
@@ -155,15 +155,15 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
 
     @Override
     public ArrayList<Task> retrieveCompleteList() {
-       ArrayList<Task> listOfTasks = new ArrayList<>(tasks.values());
+        ArrayList<Task> listOfTasks = new ArrayList<>(tasks.values());
 
-       for (Epic epic : epics.values()) {
-           listOfTasks.add(epic);
-           ArrayList<Integer> subtaskReferences = epic.getSubtaskReferences();
-           for (Integer subtaskReference : subtaskReferences) {
-               listOfTasks.add(subtasks.get(subtaskReference));
-           }
-       }
+        for (Epic epic : epics.values()) {
+            listOfTasks.add(epic);
+            ArrayList<Integer> subtaskReferences = epic.getSubtaskReferences();
+            for (Integer subtaskReference : subtaskReferences) {
+                listOfTasks.add(subtasks.get(subtaskReference));
+            }
+        }
         return listOfTasks;
     }
 
@@ -175,7 +175,7 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
         allTasks.putAll(epics);
         allTasks.putAll(subtasks);
         task = allTasks.getOrDefault(id, new Task());
-        if (task.getId() != 0)  {
+        if (task.getId() != 0) {
             Manager.getDefaultHistory().add(task);
         }
         return task;
@@ -197,13 +197,13 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
     }
 
     @Override
-     public String printTasks() {
-         StringBuilder string = new StringBuilder("\nПечать только простых задач\n");
+    public String printTasks() {
+        StringBuilder string = new StringBuilder("\nПечать только простых задач\n");
 
-         for (Task task : tasks.values()) {
-             string.append(task).append("\n");
-         }
-         return string.toString();
+        for (Task task : tasks.values()) {
+            string.append(task).append("\n");
+        }
+        return string.toString();
     }
 
     @Override
@@ -246,10 +246,5 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
             string.append(subtask).append("\n");
         }
         return string.toString();
-    }
-
-    @Override
-    public void loadFromFile(Path path) {
-
     }
 }

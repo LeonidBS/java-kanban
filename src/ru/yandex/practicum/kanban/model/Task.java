@@ -9,13 +9,6 @@ public class Task {
     private TaskStatus status;
     private TaskType type;
 
-    public Task(int id, String name, String details, TaskStatus status) {
-        this.id = id;
-        this.name = name;
-        this.details = details;
-        this.status = status;
-    }
-
     public Task(String name, String details, TaskStatus status, TaskType type) {
         this.name = name;
         this.details = details;
@@ -104,19 +97,19 @@ public class Task {
     public int hashCode() {   //Status does not count
         int hash = 17;
         if (name != null) {
-           hash = hash + name.hashCode();
+            hash = hash + name.hashCode();
         }
         hash = hash * 31;
         if (details != null) {
             hash = hash + details.hashCode();
         }
         hash = hash * 31;
-        hash +=id;
+        hash += id;
         return hash;
     }
 
     public String toStringInFile() {
-        return id + ","+ type + ",\"" + name
+        return id + "," + type + ",\"" + name
                 + "\"," + status + ",\"" + details + "\"";
     }
 }

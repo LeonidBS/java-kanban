@@ -12,17 +12,13 @@ public class Epic extends Task {
         this.subtaskReferences = subtaskReferences;
     }
 
-    public Epic(String name, String details, TaskStatus status,
-                ArrayList<Integer> subtaskReferences) {
+    public Epic(String name, String details, TaskStatus status) {
         super(name, details, status, TaskType.EPIC);
-        this.subtaskReferences = subtaskReferences;
+        this.subtaskReferences = new ArrayList<>();
     }
 
     public ArrayList<Integer> getSubtaskReferences() {
-        if (subtaskReferences == null) {
-            ArrayList<Integer> subtaskReferences = new ArrayList<>();
-        }
-            return subtaskReferences;
+        return subtaskReferences;
     }
 
     public void setSubtaskReferences(ArrayList<Integer> subtaskReferences) {
@@ -45,24 +41,22 @@ public class Epic extends Task {
         hash += subtaskReferences.hashCode();
         return hash;
     }
-    
-    public TaskStatus epicStatusBySubtask (HashMap<Integer, Subtask> subtasks) {
-        int NumberStatusNew = 0;
-        int NumberStatusInProcess = 0;
-        int NumberStatusDone = 0;
+
+    public TaskStatus epicStatusBySubtask(HashMap<Integer, Subtask> subtasks) {
+        int numberStatusNew = 0;
+        int numberStatusInProcess = 0;
+
         for (Integer subtaskReference : subtaskReferences) {
             Subtask subtask = subtasks.get(subtaskReference);
             if (subtask.getStatus() == TaskStatus.NEW) {
-                NumberStatusNew++;
+                numberStatusNew++;
             } else if (subtask.getStatus() == TaskStatus.IN_PROGRESS) {
-                NumberStatusInProcess++;
-            } else if (subtask.getStatus() == TaskStatus.DONE) {
-                NumberStatusDone++;
+                numberStatusInProcess++;
             }
         }
-        if (NumberStatusNew == subtaskReferences.size() || subtaskReferences.size() == 0) {
+        if (numberStatusNew == subtaskReferences.size() || subtaskReferences.size() == 0) {
             return TaskStatus.NEW;
-        } else if (NumberStatusInProcess > 0) {
+        } else if (numberStatusInProcess > 0) {
             return TaskStatus.IN_PROGRESS;
         } else {
             return TaskStatus.DONE;
@@ -77,7 +71,7 @@ public class Epic extends Task {
     }
 
     public String toStringInFile() {
-        return this.getId() + ","+ getTaskType() + ",\"" + this.getName() + "\"," + this.getStatus() +
-                ",\"" + this.getDetails() + "\",\"subtaskReferences:" + subtaskReferences +"\"";
+        return this.getId() + "," + getTaskType() + ",\"" + this.getName() + "\"," + this.getStatus() +
+                ",\"" + this.getDetails() + "\",\"subtaskReferences:" + subtaskReferences + "\"";
     }
 }

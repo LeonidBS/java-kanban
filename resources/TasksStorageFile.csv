@@ -8,4 +8,3 @@ id,type,name,status,details,special
 7,EPIC,"ИЗ ФАЙЛА, Второй эпик",NEW,"Детали второго эпика","subtaskReferences:[]"
 
 2,3,1,7
-
