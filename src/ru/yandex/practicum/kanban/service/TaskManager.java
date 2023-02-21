@@ -4,37 +4,33 @@ import ru.yandex.practicum.kanban.model.Epic;
 import ru.yandex.practicum.kanban.model.Subtask;
 import ru.yandex.practicum.kanban.model.Task;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.TreeMap;
 
 public interface TaskManager {
+
+    TreeMap<LocalDateTime, Task> getTimeSlotMap();
+
     int createTask(Task task);
 
     int createTask(Epic epic);
 
     int createTask(Subtask subtask);
 
-    boolean updateTask(Task task);
+    int updateTask(Task task);
 
-    boolean updateTask(Subtask subtask);
+    int updateTask(Epic epic);
 
-    boolean deleteTask(int id);
+    int updateTask(Subtask subtask);
+
+    int deleteTask(int id);
 
     void clearTaskList();
 
-    ArrayList<Task> retrieveCompleteList();
+    List<Task> retrieveCompleteList();
 
     Task retrieveTaskById(int id);
 
-    ArrayList<Subtask> retrieveSubtasks(int idEpic);
-
-    String printTasks();
-
-    String printEpics();
-
-    String printSubtasks();
-
     String printAll();
-
-    String printSubtasksByEpic(int idEpic);
-
 }

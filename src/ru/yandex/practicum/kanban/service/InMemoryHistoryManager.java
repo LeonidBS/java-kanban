@@ -1,6 +1,7 @@
 package ru.yandex.practicum.kanban.service;
 
-import ru.yandex.practicum.kanban.exceptions.Node;
+import ru.yandex.practicum.kanban.exceptions.IdPassingException;
+import ru.yandex.practicum.kanban.model.Node;
 import ru.yandex.practicum.kanban.model.Task;
 
 import java.util.ArrayList;
@@ -41,19 +42,21 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void add(Task task) {
-        if (tableNodeAddresses.getOrDefault(task.getId(), null) != null) {
+        if (tableNodeAddresses.get(task.getId()) != null) {
             removeNode(tableNodeAddresses.get(task.getId()));
         }
         tableNodeAddresses.put(task.getId(), linkLast(task));
     }
 
     @Override
-    public void remove(int id) {
-        Node node = tableNodeAddresses.getOrDefault(id, null);
+    public int remove(int id) {
+        Node node = tableNodeAddresses.get(id);
         if (node != null) {
             removeNode(node);
             tableNodeAddresses.remove(id);
+            return id;
         }
+        throw new IdPassingException("В истории не существует задачи с переданным ID: ", id);
     }
 
     @Override
@@ -74,6 +77,8 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void clearHistory() {
+        head = null;
+        tail = null;
         tableNodeAddresses.clear();
     }
 

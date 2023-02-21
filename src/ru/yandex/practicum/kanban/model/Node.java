@@ -1,6 +1,4 @@
-package ru.yandex.practicum.kanban.exceptions;
-
-import ru.yandex.practicum.kanban.model.Task;
+package ru.yandex.practicum.kanban.model;
 
 import java.util.Objects;
 

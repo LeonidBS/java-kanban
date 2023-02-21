@@ -1,9 +1,9 @@
 package ru.yandex.practicum.kanban.service;
 
 public class Manager {
-    private static InMemoryTaskManager inMemoryTaskManager = new InMemoryTaskManager();
-    private static FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager();
-    private static InMemoryHistoryManager inMemoryHistoryManager = new InMemoryHistoryManager();
+    private static final InMemoryTaskManager inMemoryTaskManager = new InMemoryTaskManager();
+    private static final FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager();
+    private static final InMemoryHistoryManager inMemoryHistoryManager = new InMemoryHistoryManager();
 
     public static TaskManager getDefault() {
         return inMemoryTaskManager;
