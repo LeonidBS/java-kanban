@@ -137,14 +137,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
     }
 
-    public Path getPath() {
-        return path;
-    }
-
-    public void setPath(Path path) {
-        FileBackedTasksManager.path = path;
-    }
-
     public static Task fromString(String value) {
         String[] splitedTaskLine = value.split(",");
         int firstIndexName = value.indexOf(splitedTaskLine[2]) + 1;
@@ -226,6 +218,14 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 return subtask;
         }
         return new Task();
+    }
+
+    public Path getPath() {
+        return path;
+    }
+
+    public void setPath(Path path) {
+        FileBackedTasksManager.path = path;
     }
 
     public void save() {

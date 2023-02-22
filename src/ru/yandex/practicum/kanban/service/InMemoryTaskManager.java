@@ -99,18 +99,6 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
         }
     }
 
-
-    private static LocalDateTime getCurrentTime() {
-        int currentTimeMinutes = LocalDateTime.now().getMinute();
-        return LocalDateTime.now().truncatedTo(ChronoUnit.HOURS)
-                .plusMinutes(15 * currentTimeMinutes / 15 + 15);
-    }
-
-    private int getId() {
-        id++;
-        return id;
-    }
-
     public static int getIdWithoutIncrement() {
         return id;
     }
@@ -367,5 +355,16 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
             string.append(task).append("\n");
         }
         return string.toString();
+    }
+
+    private static LocalDateTime getCurrentTime() {
+        int currentTimeMinutes = LocalDateTime.now().getMinute();
+        return LocalDateTime.now().truncatedTo(ChronoUnit.HOURS)
+                .plusMinutes(15 * currentTimeMinutes / 15 + 15);
+    }
+
+    private int getId() {
+        id++;
+        return id;
     }
 }

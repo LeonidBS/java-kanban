@@ -6,3 +6,5 @@ id,type,name,status,details,special
 5,SUBTASK,"Subtask 2 from file",NEW,"Details Subtask 2 from file",3,2023-02-12T12:00,2023-02-13T03:30,930
 6,SUBTASK,"Subtask 3 from file",NEW,"Details Subtask 3 from file",3,2023-02-20T16:00,2023-02-21T17:00,1500
 7,EPIC,"Epic 2 from file",NEW,"Details Epic 2 from file","subtaskReferences:[]"
+
+2,3,1,7
