@@ -63,12 +63,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         try (Scanner scanner = new Scanner(System.in)) {
             while (true) {
-                System.out.println("1 - Просмотр задачи\n" +
-                        "2 - Добавить автоматически в историю все задачи несколько раз\n" +
-                        "3 - История просмотра\n" +
-                        "4 - удалить задачу\n" +
-                        "5 - выход\n" +
-                        "6 - Вывод всех задач\n");
+                System.out.println("1 - Просмотр задачи\n"
+                        + "2 - Добавить автоматически в историю все задачи несколько раз\n"
+                        + "3 - История просмотра\n"
+                        + "4 - удалить задачу\n"
+                        + "5 - выход\n"
+                        + "6 - Вывод всех задач\n"
+                        + "7 - Вывод таблицы календаря событий\n");
                 int command = scanner.nextInt();
                 if (command == 1) {
                     System.out.println("Введите номер задачи");
@@ -101,11 +102,21 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 } else if (command == 6) {
                     System.out.println(fileBackedTasksManager.printAll());
                 } else if (command == 7) {
-                    fileBackedTasksManager.clearTaskList();
-                } else if (command == 8) {
+                    System.out.println("Введите год:");
+                    int year = scanner.nextInt();
+                    System.out.println("Введите месяц (число от 1 -12):");
+                    int month = scanner.nextInt();
                     for (Map.Entry<LocalDateTime, Task> entry :
                             Manager.getDefault().getTimeSlotMap().entrySet()) {
-                        System.out.println(entry.getKey() + "-->" + entry.getValue().getId());
+                        if (entry.getKey().getMonthValue() == month && entry.getKey().getYear() == year) {
+                            String taskInTable;
+                            if (entry.getValue() != null) {
+                                taskInTable = " Слот занят задачей с ID: " + entry.getValue().getId();
+                            } else {
+                                taskInTable = "свободный слот";
+                            }
+                            System.out.println(entry.getKey() + "-->" + taskInTable);
+                        }
                     }
                 }
             }

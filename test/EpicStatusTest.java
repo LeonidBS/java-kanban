@@ -1,5 +1,3 @@
-package ru.yandex.practicum.kanban.service.test;
-
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.kanban.model.Epic;
 import ru.yandex.practicum.kanban.model.Subtask;

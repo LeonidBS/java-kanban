@@ -1,5 +1,3 @@
-package ru.yandex.practicum.kanban.service.test;
-
 import org.junit.jupiter.api.AfterAll;
 import ru.yandex.practicum.kanban.model.Task;
 import ru.yandex.practicum.kanban.model.TaskType;

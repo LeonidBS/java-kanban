@@ -1,5 +1,3 @@
-package ru.yandex.practicum.kanban.service.test;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -67,7 +65,10 @@ class FileBackedTasksManagerTest extends TaskManagerTest<InMemoryTaskManager> {
                 tasksExpectedArray[0], tasksExpectedArray[6]};
     }
 
-    /* Для следующего теста должен иметь содержимое (всегда восстанавливается после вывполения).
+    /* ТОЛЬКО для следующего теста:
+     void retrieveCompleteListShouldReturnTheSameTasksFromFileGetHistoryShouldReturnTheSameHistoryFromFile()
+сформирован файл: TasksStorageFileConstant.csv.
+Он должен иметь содержимое ниже, которое не меняется походу выполнения теста:
     id,type,name,status,details,special
 1,SIMPLE_TASK,"Task 1 from file",NEW,"Details Task 1 from file",2023-02-01T08:00,2023-02-02T14:00,1800
 2,SIMPLE_TASK,"Task 2 from file",NEW,"Details Task 2 from file",2023-02-05T18:00,2023-02-07T20:00,3000
@@ -78,6 +79,8 @@ class FileBackedTasksManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 7,EPIC,"Epic 2 from file",NEW,"Details Epic 2 from file","subtaskReferences:[]"
 
 2,3,1,7
+
+В @AfterAll заполняется именно данный файл, поскольку его , например, "ручное" изменение приведет к не выполнению теста.
      */
 
     @Test

@@ -1,6 +1,5 @@
-package ru.yandex.practicum.kanban.service.test;
-
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import ru.yandex.practicum.kanban.exceptions.IdPassingException;
 import ru.yandex.practicum.kanban.exceptions.SubtaskCreationException;
 import ru.yandex.practicum.kanban.exceptions.TimeSlotException;
@@ -59,8 +58,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     @Test
     void retrieveTaskByIdTestShouldThrowExceptionWhenIdIsNotExisted() {
-        idPassingException = assertThrows(IdPassingException.class, () -> taskManager.retrieveTaskById(0));
 
+        Executable executable = () -> taskManager.retrieveTaskById(0);
+
+        idPassingException = assertThrows(IdPassingException.class, executable);
         assertEquals("Не существует задачи с переданным ID: " + 0, idPassingException.getDetailedMessage());
     }
 
@@ -84,9 +85,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 "Details for Test createSimpleTaskTimeExceptionTest",
                 LocalDateTime.parse("2021-02-01T08:00"), 1800);
 
-        timeSlotException = assertThrows(TimeSlotException.class,
-                () -> taskManager.createTask(newTask));
 
+        Executable executable = () -> taskManager.createTask(newTask);
+
+        timeSlotException = assertThrows(TimeSlotException.class, executable);
         assertEquals("Получено некорректное время выполнения задачи: "
                         + "время старта:" + "2021-02-01T08:00" + ", продолжительность:" + 1800,
                 timeSlotException.getDetailedMessage());
@@ -133,9 +135,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Subtask newSubtask = new Subtask("Epic createSubtaskWithoutEpicTest",
                 "Details Epic for Test createSubtaskWithoutEpicTest", 0, 1800);
 
-        subtaskCreationException = assertThrows(SubtaskCreationException.class,
-                () -> taskManager.createTask(newSubtask));
+        Executable executable = () -> taskManager.createTask(newSubtask);
 
+        subtaskCreationException = assertThrows(SubtaskCreationException.class, executable);
         assertEquals("Не существует Эпика с переданным ID: " + 0,
                 subtaskCreationException.getDetailedMessage());
     }
@@ -149,9 +151,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 "Details for Test createSubtaskTimeExceptionTest", epicID,
                 LocalDateTime.parse("2023-02-01T08:00"), 1833);
 
-        timeSlotException = assertThrows(TimeSlotException.class,
-                () -> taskManager.createTask(newSubtask));
 
+        Executable executable = () -> taskManager.createTask(newSubtask);
+
+        timeSlotException = assertThrows(TimeSlotException.class, executable);
         assertEquals("Получено некорректное время выполнения задачи: "
                         + "время старта:" + "2023-02-01T08:00" + ", продолжительность:" + 1833,
                 timeSlotException.getDetailedMessage());
@@ -179,9 +182,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 "Details for Test updateTaskTestIDException", TaskStatus.IN_PROGRESS,
                 LocalDateTime.parse("2023-02-21T18:00"), 3000);
 
-        idPassingException = assertThrows(IdPassingException.class,
-                () -> taskManager.updateTask(updatedTask));
+        Executable executable = () -> taskManager.updateTask(updatedTask);
 
+        idPassingException = assertThrows(IdPassingException.class, executable);
         assertEquals("Не существует задачи с переданным ID: " + 0,
                 idPassingException.getDetailedMessage());
     }
@@ -196,9 +199,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 "Details for Test updateSimpleTaskTest", TaskStatus.IN_PROGRESS,
                 LocalDateTime.parse("2027-02-25T08:00"), 999);
 
-        timeSlotException = assertThrows(TimeSlotException.class,
-                () -> taskManager.updateTask(updatedTask));
 
+        Executable executable = () -> taskManager.updateTask(updatedTask);
+
+        timeSlotException = assertThrows(TimeSlotException.class, executable);
         assertEquals("Получено некорректное время выполнения задачи: "
                         + "время старта:" + "2027-02-25T08:00" + ", продолжительность:" + 999,
                 timeSlotException.getDetailedMessage());
@@ -214,8 +218,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 "Details for Test updateTaskTestEqualityException",
                 TaskStatus.IN_PROGRESS, TaskType.EPIC, LocalDateTime.parse("2023-02-21T18:00"), LocalDateTime.parse("2023-02-28T05:20"), 9000);
 
-        updateTaskException = assertThrows(UpdateTaskException.class, () -> taskManager.updateTask(updatedTask));
+        Executable executable = () -> taskManager.updateTask(updatedTask);
 
+        updateTaskException = assertThrows(UpdateTaskException.class, executable);
         assertEquals("Переданная задача и задача в базе данных имеют недопустимые отличия\n"
                 + updatedTask + "\n" + savedTask, updateTaskException.getDetailedMessage());
     }
@@ -240,9 +245,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 "Details for Test updateEpicTestIDException",
                 TaskStatus.IN_PROGRESS, new ArrayList<>());
 
-        idPassingException = assertThrows(IdPassingException.class,
-                () -> taskManager.updateTask(updatedTEpic));
+        Executable executable = () -> taskManager.updateTask(updatedTEpic);
 
+        idPassingException = assertThrows(IdPassingException.class, executable);
         assertEquals("Не существует задачи с переданным ID: " + 0,
                 idPassingException.getDetailedMessage());
     }
@@ -258,9 +263,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 TaskStatus.NEW, subtasksList);
         Epic savedEpic = (Epic) taskManager.retrieveTaskById(newID);
 
-        updateTaskException = assertThrows(UpdateTaskException.class,
-                () -> taskManager.updateTask(updatedSubtasksEpic));
+        Executable executable = () -> taskManager.updateTask(updatedSubtasksEpic);
 
+        updateTaskException = assertThrows(UpdateTaskException.class, executable);
         assertEquals("Переданная задача и задача в базе данных имеют недопустимые отличия\n"
                 + updatedSubtasksEpic + "\n" + savedEpic, updateTaskException.getDetailedMessage());
     }
@@ -297,9 +302,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 "Subtask Details for Test updateSubtaskTestIDException", TaskStatus.IN_PROGRESS,
                 epicID, LocalDateTime.parse("2023-02-17T18:00"), 3300);
 
-        idPassingException = assertThrows(IdPassingException.class,
-                () -> taskManager.updateTask(updatedSubtask));
+        Executable executable = () -> taskManager.updateTask(updatedSubtask);
 
+        idPassingException = assertThrows(IdPassingException.class, executable);
         assertEquals("Не существует задачи с переданным ID: "
                 + 0, idPassingException.getDetailedMessage());
     }
@@ -317,9 +322,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 "Subtask Details for Test updateTaskSubtaskEqualityException", TaskStatus.NEW,
                 0, LocalDateTime.parse("2023-02-17T08:00"), 3000);
 
-        updateTaskException = assertThrows(UpdateTaskException.class,
-                () -> taskManager.updateTask(updatedSubtask));
+        Executable executable = () -> taskManager.updateTask(updatedSubtask);
 
+        updateTaskException = assertThrows(UpdateTaskException.class, executable);
         assertEquals("Переданная задача и задача в базе данных имеют недопустимые отличия\n"
                 + updatedSubtask + "\n" + originalSubtask, updateTaskException.getDetailedMessage());
     }
@@ -337,9 +342,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 "Subtask Details for Test updateTaskSubtaskEqualityException", TaskStatus.IN_PROGRESS,
                 epicID, LocalDateTime.parse("2020-02-17T08:00"), 0);
 
-        timeSlotException = assertThrows(TimeSlotException.class,
-                () -> taskManager.updateTask(updatedSubtask));
+        Executable executable = () -> taskManager.updateTask(updatedSubtask);
 
+        timeSlotException = assertThrows(TimeSlotException.class, executable);
         assertEquals("Получено некорректное время выполнения задачи: "
                         + "время старта:" + "2020-02-17T08:00" + ", продолжительность:" + 0,
                 timeSlotException.getDetailedMessage());
@@ -354,10 +359,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         taskManager.deleteTask(newID);
         List<Task> tasksList = taskManager.retrieveCompleteList();
+        Executable executable = () -> taskManager.retrieveTaskById(newID);
 
-        idPassingException = assertThrows(IdPassingException.class,
-                () -> taskManager.retrieveTaskById(newID));
-
+        idPassingException = assertThrows(IdPassingException.class, executable);
         assertEquals("Не существует задачи с переданным ID: "
                 + newID, idPassingException.getDetailedMessage());
         assertFalse(tasksList.contains(savedTask), "Задача не удалена из списка");
@@ -373,9 +377,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.deleteTask(newID);
         List<Task> tasksList = taskManager.retrieveCompleteList();
 
-        idPassingException = assertThrows(IdPassingException.class,
-                () -> taskManager.retrieveTaskById(newID));
+        Executable executable = () -> taskManager.retrieveTaskById(newID);
 
+        idPassingException = assertThrows(IdPassingException.class, executable);
         assertEquals("Не существует задачи с переданным ID: "
                 + newID, idPassingException.getDetailedMessage());
         assertFalse(tasksList.contains(savedEpic), "Задача не удалена из списка");
@@ -401,17 +405,18 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         taskManager.deleteTask(idNewEpic);
         List<Task> tasksList = taskManager.retrieveCompleteList();
+        Executable executableIdNewEpic = () -> taskManager.retrieveTaskById(idNewEpic);
+        Executable executableIdSubtaskFirst = () -> taskManager.retrieveTaskById(idSubtaskFirst);
+        Executable executableIdSubtaskSecond = () -> taskManager.retrieveTaskById(idSubtaskSecond);
 
-        idPassingException = assertThrows(IdPassingException.class,
-                () -> taskManager.retrieveTaskById(idNewEpic));
+
+        idPassingException = assertThrows(IdPassingException.class, executableIdNewEpic);
         assertEquals("Не существует задачи с переданным ID: "
                 + idNewEpic, idPassingException.getDetailedMessage());
-        idPassingException = assertThrows(IdPassingException.class,
-                () -> taskManager.retrieveTaskById(idSubtaskFirst));
+        idPassingException = assertThrows(IdPassingException.class, executableIdSubtaskFirst);
         assertEquals("Не существует задачи с переданным ID: "
                 + idSubtaskFirst, idPassingException.getDetailedMessage());
-        idPassingException = assertThrows(IdPassingException.class,
-                () -> taskManager.retrieveTaskById(idSubtaskSecond));
+        idPassingException = assertThrows(IdPassingException.class, executableIdSubtaskSecond);
         assertEquals("Не существует задачи с переданным ID: "
                 + idSubtaskSecond, idPassingException.getDetailedMessage());
         assertFalse(tasksList.contains(savedEpic) || tasksList.contains(savedSubtaskFirst)
@@ -431,10 +436,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         taskManager.deleteTask(newID);
         List<Task> tasksList = taskManager.retrieveCompleteList();
+        Executable executable = () -> taskManager.retrieveTaskById(newID);
 
-        idPassingException = assertThrows(IdPassingException.class,
-                () -> taskManager.retrieveTaskById(newID));
-
+        idPassingException = assertThrows(IdPassingException.class, executable);
         assertEquals("Не существует задачи с переданным ID: "
                 + newID, idPassingException.getDetailedMessage());
         assertFalse(tasksList.contains(savedSubtask), "Задача не удалена из списка");

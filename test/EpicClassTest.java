@@ -1,5 +1,3 @@
-package ru.yandex.practicum.kanban.model.test;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.kanban.model.Epic;
