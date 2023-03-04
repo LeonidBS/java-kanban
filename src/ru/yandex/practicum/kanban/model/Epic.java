@@ -38,6 +38,9 @@ public class Epic extends Task {
         this.subtaskReferences = new ArrayList<>();
     }
 
+    public Epic() {
+    }
+
     public List<Integer> getSubtaskReferences() {
         return subtaskReferences;
     }

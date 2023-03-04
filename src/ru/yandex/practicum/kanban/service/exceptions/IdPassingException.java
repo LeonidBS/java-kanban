@@ -1,4 +1,4 @@
-package ru.yandex.practicum.kanban.exceptions;
+package ru.yandex.practicum.kanban.service.exceptions;
 
 public class IdPassingException extends RuntimeException {
     private final int requestedID;

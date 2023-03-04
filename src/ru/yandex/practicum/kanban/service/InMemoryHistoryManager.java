@@ -1,6 +1,6 @@
 package ru.yandex.practicum.kanban.service;
 
-import ru.yandex.practicum.kanban.exceptions.IdPassingException;
+import ru.yandex.practicum.kanban.service.exceptions.IdPassingException;
 import ru.yandex.practicum.kanban.model.Node;
 import ru.yandex.practicum.kanban.model.Task;
 
@@ -26,18 +26,6 @@ public class InMemoryHistoryManager implements HistoryManager {
             }
         }
         return stringHistoryForFile.toString();
-    }
-
-    @Override
-    public List<Integer> historyFromString(String value) {
-        List<Integer> historyList = new ArrayList<>();
-        String[] historyString = value.split(",");
-        for (int i = 0; i < historyString.length; i++) {
-            historyList.add(Integer.parseInt(historyString[i]));
-            Task task = Manager.getDefault().retrieveTaskById(historyList.get(i));
-            add(task);
-        }
-        return historyList;
     }
 
     @Override
@@ -121,6 +109,5 @@ public class InMemoryHistoryManager implements HistoryManager {
         } else {
             tail = node.prev;
         }
-        node = null;
     }
 }

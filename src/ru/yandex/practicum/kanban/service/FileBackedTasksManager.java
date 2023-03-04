@@ -1,7 +1,7 @@
 package ru.yandex.practicum.kanban.service;
 
-import ru.yandex.practicum.kanban.exceptions.IdPassingException;
-import ru.yandex.practicum.kanban.exceptions.ManagerSaveException;
+import ru.yandex.practicum.kanban.service.exceptions.IdPassingException;
+import ru.yandex.practicum.kanban.service.exceptions.ManagerSaveException;
 import ru.yandex.practicum.kanban.model.*;
 
 import java.io.IOException;
@@ -18,12 +18,12 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     private final static String title = "id,type,name,status,details,special";
 
     public static void main(String[] args) {
-        TaskManager fileBackedTasksManager = Manager.getFileBacked();
+        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager();
 
         System.out.println("Запускаем тест из метода main класса FileBackedTasksManager\n");
 
         System.out.println("Читаем файл\n");
-        loadFromFile();
+        fileBackedTasksManager.loadFromStorage();
         System.out.println("\nПечать всех задач считанный из файла\n");
         System.out.println(fileBackedTasksManager.printAll());
 
@@ -107,7 +107,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     System.out.println("Введите месяц (число от 1 -12):");
                     int month = scanner.nextInt();
                     for (Map.Entry<LocalDateTime, Task> entry :
-                            Manager.getDefault().getTimeSlotMap().entrySet()) {
+                            Manager.getInMemoryTask().getTimeSlotMap().entrySet()) {
                         if (entry.getKey().getMonthValue() == month && entry.getKey().getYear() == year) {
                             String taskInTable;
                             if (entry.getValue() != null) {
@@ -124,9 +124,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             e.printStackTrace();
             System.out.println("Введите числовое значение из меню");
         }
-    }
+          }
 
-    public static void loadFromFile() {
+    public void loadFromStorage() {
         List<String> taskLines;
         try {
             taskLines = Files.readAllLines(path);
@@ -136,10 +136,24 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     .collect(Collectors.partitioningBy(line -> line.matches("[^a-zA-Z]+")));
 
             for (String taskLine : taskListFromFile.get(false)) {
-                writingHashFormFile(fromString(taskLine));
+                switch (fromString(taskLine).getTaskType()) {
+                    case SIMPLE_TASK:
+                        putTaskToMapFormFile(fromString(taskLine));
+                        break;
+                    case EPIC:
+                        putTaskToMapFormFile((Epic) fromString(taskLine));
+                        break;
+                    case SUBTASK:
+                        putTaskToMapFormFile((Subtask) fromString(taskLine));
+                        break;
+                }
             }
             if (!taskListFromFile.get(true).isEmpty()) {
-                Manager.getDefaultHistory().historyFromString(taskListFromFile.get(true).get(0));
+                       String[] historyString = taskListFromFile.get(true).get(0).split(",");
+                    for (int i = 0; i < historyString.length; i++) {
+                        Task task = retrieveTaskById(Integer.parseInt(historyString[i]));
+                        Manager.getDefaultHistory().add(task);
+                 }
             }
 
         } catch (IOException e) {
@@ -187,7 +201,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         String details = value.substring(firstIndexDetails, value.length() - 1);
         switch (TaskType.valueOf(splitedTaskLine[1])) {
             case SIMPLE_TASK:
-                Task task = new Task(id, name, details, status, startTime, duration);
+                Task task = new Task(id, name, details, status, TaskType.SIMPLE_TASK, startTime, endTime, duration);
                 if (stringStartTime.matches(dateTimePatten)) {
                     takeTimeSlot(task);
                 }
@@ -240,11 +254,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     public void save() {
-        List<String> taskLines = new ArrayList<>();
-        List<Task> allTasks = retrieveCompleteList();
-        for (Task task : allTasks) {
-            taskLines.add(task.toStringInFile());
-        }
+        List<String> taskLines = retrieveCompleteList().stream()
+                .map(Task::toStringInFile)
+                .collect(Collectors.toList());
+
         if (Manager.getDefaultHistory().getHistory().size() > 0) {
             taskLines.add("");
             taskLines.add(Manager.getDefaultHistory().historyToString());
@@ -322,10 +335,29 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
+    public List<Task> retrieveAllTasks() {
+        return super.retrieveAllTasks();
+    }
+
+    @Override
+    public List<Task> retrieveAllSubtasks() {
+        return super.retrieveAllSubtasks();
+    }
+
+    @Override
+    public List<Task> retrieveAllEpics() {
+        return super.retrieveAllEpics();
+    }
+
+    @Override
     public Task retrieveTaskById(int id) {
         Task task = super.retrieveTaskById(id);
         save();
         return task;
     }
 
+    @Override
+    public List<Subtask> retrieveSubtasks(int idEpic) {
+        return super.retrieveSubtasks(idEpic);
+    }
 }

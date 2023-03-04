@@ -53,7 +53,7 @@ public class Task {
         this.type = TaskType.SIMPLE_TASK;
         this.startTime = startTime;
         this.duration = duration;
-        this.endTime = startTime.plusMinutes(duration);
+      //  this.endTime = startTime.plusMinutes(duration);
     }
 
     public Task() {

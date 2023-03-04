@@ -1,9 +1,9 @@
 package ru.yandex.practicum.kanban.service;
 
-import ru.yandex.practicum.kanban.exceptions.IdPassingException;
-import ru.yandex.practicum.kanban.exceptions.SubtaskCreationException;
-import ru.yandex.practicum.kanban.exceptions.TimeSlotException;
-import ru.yandex.practicum.kanban.exceptions.UpdateTaskException;
+import ru.yandex.practicum.kanban.service.exceptions.IdPassingException;
+import ru.yandex.practicum.kanban.service.exceptions.SubtaskCreationException;
+import ru.yandex.practicum.kanban.service.exceptions.TimeSlotException;
+import ru.yandex.practicum.kanban.service.exceptions.UpdateTaskException;
 import ru.yandex.practicum.kanban.model.Epic;
 import ru.yandex.practicum.kanban.model.Subtask;
 import ru.yandex.practicum.kanban.model.Task;
@@ -42,9 +42,9 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
                     && epic.getStatus() == epics.get(epic.getId()).getStatus();
 
     public InMemoryTaskManager() {
-        startCalendarDate = LocalDate.now().atStartOfDay().minusMonths(1);
+        startCalendarDate = LocalDate.now().atStartOfDay().minusMonths(2);
         endCalendarDate = LocalDate.now().atStartOfDay()
-                .plusMonths(14);
+                .plusMonths(13);
         LocalDateTime followTime = startCalendarDate;
         while (!followTime.isAfter(endCalendarDate)) {
             timeSlotMap.put(followTime, null);
@@ -88,16 +88,6 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
         return startTime;
     }
 
-    public static void deleteTimeSlot(Task task) {
-        Map<LocalDateTime, Task> limitedMap = timeSlotMap.subMap(task.getStartTime(), task.getEndTime());
-        for (Map.Entry<LocalDateTime, Task> entry : limitedMap.entrySet()) {
-            if (entry.getValue() != null) {
-                if (entry.getValue().equals(task)) {
-                    timeSlotMap.put(entry.getKey(), null);
-                }
-            }
-        }
-    }
 
     public static int getIdWithoutIncrement() {
         return id;
@@ -107,15 +97,15 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
         id = newID;
     }
 
-    public static void writingHashFormFile(Task task) {
+    public static void putTaskToMapFormFile(Task task) {
         tasks.put(task.getId(), task);
     }
 
-    public static void writingHashFormFile(Epic epic) {
+    public static void putTaskToMapFormFile(Epic epic) {
         epics.put(epic.getId(), epic);
     }
 
-    public static void writingHashFormFile(Subtask subtask) {
+    public static void putTaskToMapFormFile(Subtask subtask) {
         subtasks.put(subtask.getId(), subtask);
     }
 
@@ -331,6 +321,24 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
     }
 
     @Override
+    public List<Task> retrieveAllTasks() {
+        List<Task> listOfTasks = new ArrayList<>(tasks.values());
+        return listOfTasks;
+    }
+
+    @Override
+    public List<Task> retrieveAllSubtasks() {
+        List<Task> listOfTasks = new ArrayList<>(subtasks.values());
+        return listOfTasks;
+    }
+
+    @Override
+    public List<Task> retrieveAllEpics() {
+        List<Task> listOfTasks = new ArrayList<>(epics.values());
+        return listOfTasks;
+    }
+
+    @Override
     public Task retrieveTaskById(int id) {
         HashMap<Integer, Task> allTasks = new HashMap<>();
         allTasks.putAll(tasks);
@@ -347,6 +355,21 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
     }
 
     @Override
+    public List<Subtask> retrieveSubtasks(int idEpic) {
+        ArrayList<Subtask> subtasksByEpic = new ArrayList<>();
+        Epic epic = epics.getOrDefault(idEpic, null);
+
+        if (epic != null) {
+            for (int id : subtasks.keySet()) {
+                if (subtasks.get(id).getEpicReference() == idEpic) {
+                    subtasksByEpic.add(subtasks.get(id));
+                }
+            }
+        }
+        return subtasksByEpic;
+    }
+
+    @Override
     public String printAll() {
         List<Task> listOfTasks = retrieveCompleteList();
         StringBuilder string = new StringBuilder("\nПечать всех задач\n");
@@ -357,14 +380,27 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
         return string.toString();
     }
 
-    private static LocalDateTime getCurrentTime() {
-        int currentTimeMinutes = LocalDateTime.now().getMinute();
-        return LocalDateTime.now().truncatedTo(ChronoUnit.HOURS)
-                .plusMinutes(15 * currentTimeMinutes / 15 + 15);
-    }
-
     private int getId() {
         id++;
         return id;
     }
+
+       private static LocalDateTime getCurrentTime() {
+        int currentTimeMinutes = LocalDateTime.now().getMinute();
+        LocalDateTime l = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS)
+                .plusMinutes(15 * (LocalDateTime.now().getMinute() / 15) + 15);
+        return l;
+    }
+
+    private static void deleteTimeSlot(Task task) {
+        Map<LocalDateTime, Task> limitedMap = timeSlotMap.subMap(task.getStartTime(), task.getEndTime());
+        for (Map.Entry<LocalDateTime, Task> entry : limitedMap.entrySet()) {
+            if (entry.getValue() != null) {
+                if (entry.getValue().equals(task)) {
+                    timeSlotMap.put(entry.getKey(), null);
+                }
+            }
+        }
+    }
+
 }

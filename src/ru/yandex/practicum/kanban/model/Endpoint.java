@@ -1,0 +1,20 @@
+package ru.yandex.practicum.kanban.model;
+
+public enum Endpoint {
+    GET_TASKS,
+    GET_TASK_ID,
+    POST_CREATE_TASK,
+    POST_UPDATE_TASK,
+    GET_SUBTASKS,
+    POST_CREATE_SUBTASK,
+    POST_UPDATE_SUBTASK,
+    GET_EPICS,
+    POST_CREATE_EPIC,
+    POST_UPDATE_EPIC,
+    DELETE_TASK_ID,
+    DELETE_TASKS,
+    GET_EPIC_SUBTASKS,
+    GET_HISTORY,
+    GET_PRIORITIZED_TASKS,
+    UNKNOWN
+}

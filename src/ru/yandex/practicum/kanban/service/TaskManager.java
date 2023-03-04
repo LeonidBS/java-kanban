@@ -5,6 +5,7 @@ import ru.yandex.practicum.kanban.model.Subtask;
 import ru.yandex.practicum.kanban.model.Task;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -30,7 +31,15 @@ public interface TaskManager {
 
     List<Task> retrieveCompleteList();
 
+    List<Task> retrieveAllTasks();
+
+    List<Task> retrieveAllSubtasks();
+
+    List<Task> retrieveAllEpics();
+
     Task retrieveTaskById(int id);
+
+    List<Subtask> retrieveSubtasks(int idEpic);
 
     String printAll();
 }

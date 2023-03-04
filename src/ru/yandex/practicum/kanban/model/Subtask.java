@@ -29,6 +29,9 @@ public class Subtask extends Task {
         this.epicReference = epicReference;
     }
 
+    public  Subtask(int epicReference) {
+        this.epicReference = epicReference;
+    }
 
     public int getEpicReference() {
         return epicReference;

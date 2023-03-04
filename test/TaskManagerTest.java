@@ -1,9 +1,10 @@
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
-import ru.yandex.practicum.kanban.exceptions.IdPassingException;
-import ru.yandex.practicum.kanban.exceptions.SubtaskCreationException;
-import ru.yandex.practicum.kanban.exceptions.TimeSlotException;
-import ru.yandex.practicum.kanban.exceptions.UpdateTaskException;
+import ru.yandex.practicum.kanban.service.InMemoryTaskManager;
+import ru.yandex.practicum.kanban.service.exceptions.IdPassingException;
+import ru.yandex.practicum.kanban.service.exceptions.SubtaskCreationException;
+import ru.yandex.practicum.kanban.service.exceptions.TimeSlotException;
+import ru.yandex.practicum.kanban.service.exceptions.UpdateTaskException;
 import ru.yandex.practicum.kanban.model.*;
 import ru.yandex.practicum.kanban.service.TaskManager;
 
@@ -13,12 +14,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static ru.yandex.practicum.kanban.service.InMemoryTaskManager.writingHashFormFile;
+import static ru.yandex.practicum.kanban.service.InMemoryTaskManager.putTaskToMapFormFile;
 
 public abstract class TaskManagerTest<T extends TaskManager> {
     private final T taskManager;
     private IdPassingException idPassingException;
-    private SubtaskCreationException subtaskCreationException;
     private UpdateTaskException updateTaskException;
     private TimeSlotException timeSlotException;
 
@@ -39,10 +39,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Task task = new Task(4, "TestTask", "DetailTestTask",
                 TaskStatus.NEW, LocalDateTime.parse("2023-02-20T16:00"), 1500);
 
-        writingHashFormFile(epic);
-        writingHashFormFile(subtask1);
-        writingHashFormFile(subtask2);
-        writingHashFormFile(task);
+        InMemoryTaskManager.putTaskToMapFormFile(epic);
+        putTaskToMapFormFile(subtask1);
+        putTaskToMapFormFile(subtask2);
+        InMemoryTaskManager.putTaskToMapFormFile(task);
         Epic savedEpic = (Epic) taskManager.retrieveTaskById(1);
         Subtask savedSubtask1 = (Subtask) taskManager.retrieveTaskById(2);
         Subtask savedSubtask2 = (Subtask) taskManager.retrieveTaskById(3);
@@ -137,7 +137,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         Executable executable = () -> taskManager.createTask(newSubtask);
 
-        subtaskCreationException = assertThrows(SubtaskCreationException.class, executable);
+        SubtaskCreationException subtaskCreationException = assertThrows(SubtaskCreationException.class, executable);
         assertEquals("Не существует Эпика с переданным ID: " + 0,
                 subtaskCreationException.getDetailedMessage());
     }
@@ -424,7 +424,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void deleteTaskShouldRemoveFromSubtasksMapSubtaskWithIdRemovingCheckByRetrieveCompleteListAndretrieveTaskById() {
+    void deleteTaskShouldRemoveFromSubtasksMapSubtaskWithIdRemovingCheckByRetrieveCompleteListAndRetrieveTaskById() {
         Epic epic = new Epic("Test deleteSubtaskTest",
                 "Details for Test deleteSubtaskTest");
         final int idNewEpic = taskManager.createTask(epic);
@@ -505,4 +505,26 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         assertTrue(tasksCompleteList.isEmpty(), "Список задач не пуст");
     }
+
+    @Test
+    void getSubtasksBYEpicIdShouldRetrieveExcpectedSubtasks() {
+        Epic epic = new Epic("Test deleteSubtaskTest",
+                "Details for Test deleteSubtaskTest");
+        final int idNewEpic = taskManager.createTask(epic);
+        Subtask subtask1 = new Subtask("Test deleteSubtaskTest",
+                "Details for Test deleteSubtaskTest", idNewEpic,
+                LocalDateTime.parse("2023-02-21T18:00"), 3000);
+        final int newID1 = taskManager.createTask(subtask1);
+        Subtask subtask2 = new Subtask("Test deleteSubtaskTest",
+                "Details for Test deleteSubtaskTest", idNewEpic,
+                LocalDateTime.parse("2023-02-21T18:00"), 3000);
+        final int newID2 = taskManager.createTask(subtask2);
+        List<Subtask> expectedSubtaskList = Arrays.asList(subtask1, subtask2);
+
+        List<Subtask> testedSubtaskList = taskManager.retrieveSubtasks(idNewEpic);
+
+        assertNotNull(testedSubtaskList, "Список подзадач не получен");
+        assertEquals(expectedSubtaskList, testedSubtaskList, "Список подзадач не соответствует заданному");
+      }
+
 }

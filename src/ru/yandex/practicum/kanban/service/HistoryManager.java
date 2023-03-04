@@ -17,5 +17,4 @@ public interface HistoryManager {
 
     String historyToString();
 
-    List<Integer> historyFromString(String value);
 }
