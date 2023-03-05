@@ -29,6 +29,8 @@ public interface TaskManager {
 
     void clearTaskList();
 
+    InMemoryHistoryManager getInMemoryHistoryManager();
+
     List<Task> retrieveCompleteList();
 
     List<Task> retrieveAllTasks();

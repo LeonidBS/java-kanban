@@ -4,7 +4,6 @@ import ru.yandex.practicum.kanban.model.Epic;
 import ru.yandex.practicum.kanban.model.Subtask;
 import ru.yandex.practicum.kanban.model.Task;
 import ru.yandex.practicum.kanban.service.HttpTaskManager;
-import ru.yandex.practicum.kanban.service.Manager;
 import ru.yandex.practicum.kanban.service.exceptions.IdPassingException;
 
 import java.io.IOException;
@@ -15,40 +14,39 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-
         new KVServer().start();
-        new HttpTaskServer().start();
+
         HttpTaskManager httpTaskManager = new HttpTaskManager();
+        new HttpTaskServer(httpTaskManager).start();
 
-
-        System.out.println("Добавляем различные задачи согласно задания из менеджера\n");
-        Task task = new Task("ИЗ МЕНЕДЖЕРА, Первая простая задача",
-                "Детали к первой простой задачи ИЗ МЕНЕДЖЕРА", 1200);
+        System.out.println("Добавляем различные задачи согласно задания ИЗ HTTP\n");
+        Task task = new Task("ИЗ HTTP, Первая простая задача",
+                "Детали к первой простой задачи ИЗ HTTP", 1200);
         int newID = httpTaskManager.createTask(task);
         System.out.println(newID);
 
-        task = new Task("ИЗ МЕНЕДЖЕРА, Вторая простая задача",
-                "Детали ко второй простой задачи ИЗ МЕНЕДЖЕРА", 2700);
+        task = new Task("ИЗ HTTP, Вторая простая задача",
+                "Детали ко второй простой задачи ИЗ HTTP", 2700);
         newID = httpTaskManager.createTask(task);
         System.out.println(newID);
 
-        Epic epic = new Epic("ИЗ МЕНЕДЖЕРА, Первый эпик",
-                "Детали первого эпика ИЗ МЕНЕДЖЕРА");
+        Epic epic = new Epic("ИЗ HTTP, Первый эпик",
+                "Детали первого эпика ИЗ HTTP");
         int newEpicID = httpTaskManager.createTask(epic);
         System.out.println(newID);
 
-        Subtask subtask = new Subtask("ИЗ МЕНЕДЖЕРА, Первая подзадача к первому эпику",
-                "Детали первой подзадачи к первому эпику ИЗ МЕНЕДЖЕРА", newEpicID, 60);
+        Subtask subtask = new Subtask("ИЗ HTTP, Первая подзадача к первому эпику",
+                "Детали первой подзадачи к первому эпику ИЗ HTTP", newEpicID, 60);
         newID = httpTaskManager.createTask(subtask);
         System.out.println(newID);
 
-        subtask = new Subtask("ИЗ МЕНЕДЖЕРА, Вторая подзадача к первому эпику",
-                "Детали второй подзадачи к первому эпику ИЗ МЕНЕДЖЕРА", newEpicID, 75);
+        subtask = new Subtask("ИЗ HTTP, Вторая подзадача к первому эпику",
+                "Детали второй подзадачи к первому эпику ИЗ HTTP", newEpicID, 75);
         newID = httpTaskManager.createTask(subtask);
         System.out.println(newID);
 
-        epic = new Epic("ИЗ МЕНЕДЖЕРА, Второй эпик",
-                "Детали второго эпика ИЗ МЕНЕДЖЕРА");
+        epic = new Epic("ИЗ HTTP, Второй эпик",
+                "Детали второго эпика ИЗ HTTP");
         newID = httpTaskManager.createTask(epic);
         System.out.println(newID);
 
@@ -86,7 +84,7 @@ public class Main {
                     httpTaskManager.retrieveTaskById(6);
 
                 } else if (command == 3) {
-                    System.out.println(Manager.getDefaultHistory().printHistory());
+                    System.out.println(httpTaskManager.getInMemoryHistoryManager().printHistory());
                 } else if (command == 4) {
                     System.out.println("Введите номер задачи");
                     int idDelete = scanner.nextInt();
@@ -101,7 +99,7 @@ public class Main {
                     System.out.println("Введите месяц (число от 1 -12):");
                     int month = scanner.nextInt();
                     for (Map.Entry<LocalDateTime, Task> entry :
-                            Manager.getDefault().getTimeSlotMap().entrySet()) {
+                            httpTaskManager.getTimeSlotMap().entrySet()) {
                         if (entry.getKey().getMonthValue() == month && entry.getKey().getYear() == year) {
                             String taskInTable;
                             if (entry.getValue() != null) {

@@ -1,12 +1,12 @@
 package ru.yandex.practicum.kanban.service;
 
+import ru.yandex.practicum.kanban.model.Epic;
+import ru.yandex.practicum.kanban.model.Subtask;
+import ru.yandex.practicum.kanban.model.Task;
 import ru.yandex.practicum.kanban.service.exceptions.IdPassingException;
 import ru.yandex.practicum.kanban.service.exceptions.SubtaskCreationException;
 import ru.yandex.practicum.kanban.service.exceptions.TimeSlotException;
 import ru.yandex.practicum.kanban.service.exceptions.UpdateTaskException;
-import ru.yandex.practicum.kanban.model.Epic;
-import ru.yandex.practicum.kanban.model.Subtask;
-import ru.yandex.practicum.kanban.model.Task;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,29 +15,30 @@ import java.util.*;
 import java.util.function.Predicate;
 
 public class InMemoryTaskManager implements TaskManager {  // README includes some comments about this code implementation
-    private static int id = 0;
-    private static LocalDateTime firstFreeSlot;
-    private static LocalDateTime startCalendarDate;
-    private static LocalDateTime endCalendarDate;
-    private static final HashMap<Integer, Task> tasks = new HashMap<>();
-    private static final HashMap<Integer, Epic> epics = new HashMap<>();
-    private static final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    private int id = 0;
+    private LocalDateTime firstFreeSlot;
+    private LocalDateTime startCalendarDate;
+    private LocalDateTime endCalendarDate;
+    private final HashMap<Integer, Task> tasks = new HashMap<>();
+    private final HashMap<Integer, Epic> epics = new HashMap<>();
+    private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    private final InMemoryHistoryManager inMemoryHistoryManager = new InMemoryHistoryManager();
 
-    private static final Comparator<LocalDateTime> comparator = Comparator.naturalOrder();
-    private static final TreeMap<LocalDateTime, Task> timeSlotMap =
+    private final Comparator<LocalDateTime> comparator = Comparator.naturalOrder();
+    private final TreeMap<LocalDateTime, Task> timeSlotMap =
             new TreeMap<>(comparator);
 
-    public Predicate<Task> isExistTask = task -> tasks.get(task.getId()) != null;
-    public Predicate<Task> isExistEpic = epic -> epics.get(epic.getId()) != null;
-    public Predicate<Task> isExistSubtask = subtask -> subtasks.get(subtask.getId()) != null;
-    public Predicate<Task> isStartTimeSet = task -> task.getStartTime() == null;
-    public Predicate<Task> isTimeslotValid = task -> task.getStartTime().isAfter(startCalendarDate)
+    private final Predicate<Task> isExistTask = task -> tasks.get(task.getId()) != null;
+    private final Predicate<Task> isExistEpic = epic -> epics.get(epic.getId()) != null;
+    private final Predicate<Task> isExistSubtask = subtask -> subtasks.get(subtask.getId()) != null;
+    private final Predicate<Task> isStartTimeSet = task -> task.getStartTime() == null;
+    private final Predicate<Task> isTimeslotValid = task -> task.getStartTime().isAfter(startCalendarDate)
             && task.getStartTime().plusMinutes(task.getDuration()).isBefore(endCalendarDate)
             && task.getDuration() >= 15 && task.getDuration() % 15 == 0;
-    public Predicate<Task> isConsistWithExisted = task -> task.hashCode() == tasks.get(task.getId()).hashCode();
-    public Predicate<Subtask> isConsistWithExistedSubtask = subtask ->
+    private final Predicate<Task> isConsistWithExisted = task -> task.hashCode() == tasks.get(task.getId()).hashCode();
+    private final Predicate<Subtask> isConsistWithExistedSubtask = subtask ->
             subtask.hashCode() == subtasks.get(subtask.getId()).hashCode();
-    public Predicate<Task> isConsistWithExistedEpic = epic ->
+    private final Predicate<Task> isConsistWithExistedEpic = epic ->
             epic.hashCode() == epics.get(epic.getId()).hashCode()
                     && epic.getStatus() == epics.get(epic.getId()).getStatus();
 
@@ -54,59 +55,6 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
         if (firstFreeSlot.isBefore(LocalDateTime.now())) {
             firstFreeSlot = getCurrentTime();
         }
-    }
-
-    public static LocalDateTime takeTimeSlot(Task task) {
-        int followDuration = 0;
-        LocalDateTime followTime;
-        LocalDateTime startTime = task.getStartTime();
-        if (task.getStartTime().isAfter(firstFreeSlot) || task.getStartTime().equals(firstFreeSlot)) {
-            followTime = task.getStartTime();
-            while (task.getDuration() > followDuration) {
-                timeSlotMap.put(followTime, task);
-                followTime = followTime.plusMinutes(15);
-                followDuration += 15;
-            }
-            task.setEndTime(followTime);
-            firstFreeSlot = followTime;
-        } else {
-            followTime = task.getStartTime();
-            while (task.getDuration() > followDuration) {
-                if (timeSlotMap.putIfAbsent(followTime, task) == null) {
-                    if (followDuration == 0) {
-                        startTime = followTime;
-                    }
-                    followDuration += 15;
-                }
-                followTime = followTime.plusMinutes(15);
-            }
-            task.setEndTime(followTime);
-            if (firstFreeSlot.isBefore(followTime.plusMinutes(15))) {
-                firstFreeSlot = followTime.plusMinutes(15);
-            }
-        }
-        return startTime;
-    }
-
-
-    public static int getIdWithoutIncrement() {
-        return id;
-    }
-
-    public static void setId(int newID) {
-        id = newID;
-    }
-
-    public static void putTaskToMapFormFile(Task task) {
-        tasks.put(task.getId(), task);
-    }
-
-    public static void putTaskToMapFormFile(Epic epic) {
-        epics.put(epic.getId(), epic);
-    }
-
-    public static void putTaskToMapFormFile(Subtask subtask) {
-        subtasks.put(subtask.getId(), subtask);
     }
 
     @Override
@@ -254,7 +202,7 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
         if (tasks.get(id) != null) {
             deleteTimeSlot(tasks.get(id));
             tasks.remove(id);
-            Manager.getDefaultHistory().remove(id);
+            inMemoryHistoryManager.remove(id);
             return id;
         } else if (epics.get(id) != null) {
             List<Integer> subtaskReferences = epics.get(id).getSubtaskReferences();
@@ -262,17 +210,17 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
                 if (subtasks.get(subtaskReference) != null) {
                     deleteTimeSlot(subtasks.get(subtaskReference));
                     subtasks.remove(subtaskReference);
-                    Manager.getDefaultHistory().remove(subtaskReference);
+                    inMemoryHistoryManager.remove(subtaskReference);
                 }
             }
             epics.remove(id);
-            Manager.getDefaultHistory().remove(id);
+            inMemoryHistoryManager.remove(id);
             return id;
         } else if (subtasks.get(id) != null) {
             deleteTimeSlot(subtasks.get(id));
             int epicReference = subtasks.get(id).getEpicReference();
             subtasks.remove(id);
-            Manager.getDefaultHistory().remove(id);
+            inMemoryHistoryManager.remove(id);
             Epic epic = epics.get(epicReference);
             List<Integer> epicSubtaskReferences = epic.getSubtaskReferences();
             epicSubtaskReferences.remove(Integer.valueOf(id));
@@ -303,7 +251,7 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
         subtasks.clear();
         epics.clear();
         id = 0;
-        Manager.getDefaultHistory().clearHistory();
+        inMemoryHistoryManager.clearHistory();
     }
 
     @Override
@@ -322,20 +270,17 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
 
     @Override
     public List<Task> retrieveAllTasks() {
-        List<Task> listOfTasks = new ArrayList<>(tasks.values());
-        return listOfTasks;
+        return new ArrayList<>(tasks.values());
     }
 
     @Override
     public List<Task> retrieveAllSubtasks() {
-        List<Task> listOfTasks = new ArrayList<>(subtasks.values());
-        return listOfTasks;
+        return new ArrayList<>(subtasks.values());
     }
 
     @Override
     public List<Task> retrieveAllEpics() {
-        List<Task> listOfTasks = new ArrayList<>(epics.values());
-        return listOfTasks;
+        return new ArrayList<>(epics.values());
     }
 
     @Override
@@ -347,7 +292,7 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
 
         Optional<Task> taskOptimal = Optional.ofNullable(allTasks.get(id));
         if (taskOptimal.isPresent()) {
-            Manager.getDefaultHistory().add(taskOptimal.get());
+            inMemoryHistoryManager.add(taskOptimal.get());
         } else {
             throw new IdPassingException("Не существует задачи с переданным ID: ", id);
         }
@@ -370,6 +315,11 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
     }
 
     @Override
+    public InMemoryHistoryManager getInMemoryHistoryManager() {
+        return inMemoryHistoryManager;
+    }
+
+    @Override
     public String printAll() {
         List<Task> listOfTasks = retrieveCompleteList();
         StringBuilder string = new StringBuilder("\nПечать всех задач\n");
@@ -385,14 +335,65 @@ public class InMemoryTaskManager implements TaskManager {  // README includes so
         return id;
     }
 
-       private static LocalDateTime getCurrentTime() {
-        int currentTimeMinutes = LocalDateTime.now().getMinute();
-        LocalDateTime l = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS)
-                .plusMinutes(15 * (LocalDateTime.now().getMinute() / 15) + 15);
-        return l;
+    protected LocalDateTime takeTimeSlot(Task task) {
+        int followDuration = 0;
+        LocalDateTime followTime;
+        LocalDateTime startTime = task.getStartTime();
+        if (task.getStartTime().isAfter(firstFreeSlot) || task.getStartTime().equals(firstFreeSlot)) {
+            followTime = task.getStartTime();
+            while (task.getDuration() > followDuration) {
+                timeSlotMap.put(followTime, task);
+                followTime = followTime.plusMinutes(15);
+                followDuration += 15;
+            }
+            task.setEndTime(followTime);
+            firstFreeSlot = followTime;
+        } else {
+            followTime = task.getStartTime();
+            while (task.getDuration() > followDuration) {
+                if (timeSlotMap.putIfAbsent(followTime, task) == null) {
+                    if (followDuration == 0) {
+                        startTime = followTime;
+                    }
+                    followDuration += 15;
+                }
+                followTime = followTime.plusMinutes(15);
+            }
+            task.setEndTime(followTime);
+            if (firstFreeSlot.isBefore(followTime.plusMinutes(15))) {
+                firstFreeSlot = followTime.plusMinutes(15);
+            }
+        }
+        return startTime;
     }
 
-    private static void deleteTimeSlot(Task task) {
+    protected void setId(int newID) {
+        id = newID;
+    }
+
+    protected int getIdWithoutIncrement() {
+        return id;
+    }
+
+    protected void putTaskToMapFormFile(Task task) {
+        tasks.put(task.getId(), task);
+    }
+
+    protected void putTaskToMapFormFile(Epic epic) {
+        epics.put(epic.getId(), epic);
+    }
+
+    protected void putTaskToMapFormFile(Subtask subtask) {
+        subtasks.put(subtask.getId(), subtask);
+    }
+
+
+    private static LocalDateTime getCurrentTime() {
+        return LocalDateTime.now().truncatedTo(ChronoUnit.HOURS)
+                .plusMinutes(15 * (LocalDateTime.now().getMinute() / 15) + 15);
+    }
+
+    private void deleteTimeSlot(Task task) {
         Map<LocalDateTime, Task> limitedMap = timeSlotMap.subMap(task.getStartTime(), task.getEndTime());
         for (Map.Entry<LocalDateTime, Task> entry : limitedMap.entrySet()) {
             if (entry.getValue() != null) {

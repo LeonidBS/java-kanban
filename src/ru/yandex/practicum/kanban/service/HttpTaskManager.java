@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpTaskManager extends FileBackedTasksManager {
-    private KVTaskClient kvTaskClient;
+    private final KVTaskClient kvTaskClient;
 
     public HttpTaskManager() {
         URL url;
@@ -41,7 +41,7 @@ public class HttpTaskManager extends FileBackedTasksManager {
         String stringToSave = retrieveCompleteList().stream()
                 .map(Task::toStringInFile)
                 .collect(Collectors.joining("/n"));
-        stringToSave += "/n" + Manager.getDefaultHistory().historyToString();
+        stringToSave += "/n" + getInMemoryHistoryManager().historyToString();
         kvTaskClient.put(kvTaskClient.getApiToken(), stringToSave);
     }
 
@@ -69,9 +69,9 @@ public class HttpTaskManager extends FileBackedTasksManager {
         }
         if (!taskListFromFile.get(true).isEmpty()) {
             String[] historyString = taskListFromFile.get(true).get(0).split(",");
-            for (int i = 0; i < historyString.length; i++) {
-                Task task = retrieveTaskById(Integer.parseInt(historyString[i]));
-                Manager.getDefaultHistory().add(task);
+            for (String s : historyString) {
+                Task task = retrieveTaskById(Integer.parseInt(s));
+                getInMemoryHistoryManager().add(task);
             }
         }
     }

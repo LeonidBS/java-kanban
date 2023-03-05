@@ -44,7 +44,7 @@ class HttpTaskManagerTest extends TaskManagerTest<InMemoryTaskManager>  {
         historyExpectedArray = new Task[]{tasksExpectedArray[1], tasksExpectedArray[2], tasksExpectedArray[0], tasksExpectedArray[6]};
         kvServer = new KVServer();
         kvServer.start();
-        httpTaskManager = new HttpTaskManager();
+        httpTaskManager = Manager.getDefault();
     }
 
      @Test
@@ -82,11 +82,10 @@ class HttpTaskManagerTest extends TaskManagerTest<InMemoryTaskManager>  {
         httpTaskManager.retrieveTaskById(3);
         httpTaskManager.retrieveTaskById(1);
         httpTaskManager.retrieveTaskById(7);
-        Manager.getInMemoryTask().clearTaskList();
         httpTaskManager.loadFromStorage();
         httpTaskManager.retrieveCompleteList().toArray(taskLoadedFormFileArray);
-        Task[] historyLoadedArray = new Task[Manager.getDefaultHistory().getHistory().size()];
-        Manager.getDefaultHistory().getHistory().toArray(historyLoadedArray);
+        Task[] historyLoadedArray = new Task[httpTaskManager.getInMemoryHistoryManager().getHistory().size()];
+        httpTaskManager.getInMemoryHistoryManager().getHistory().toArray(historyLoadedArray);
 
         assertArrayEquals(tasksExpectedArray, taskLoadedFormFileArray, "Считанный список событий изменен");
         assertArrayEquals(historyExpectedArray, historyLoadedArray, "Считанный история изменена");

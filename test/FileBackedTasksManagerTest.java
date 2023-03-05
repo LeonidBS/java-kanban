@@ -1,12 +1,9 @@
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.kanban.http.KVServer;
 import ru.yandex.practicum.kanban.model.*;
 import ru.yandex.practicum.kanban.service.FileBackedTasksManager;
-
 import ru.yandex.practicum.kanban.service.InMemoryTaskManager;
-import ru.yandex.practicum.kanban.service.Manager;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,8 +23,6 @@ class FileBackedTasksManagerTest extends TaskManagerTest<InMemoryTaskManager> {
     private static Task[] historyExpectedArray = new Task[4];
     private final static Path copyPath = Paths.get("resources\\TasksStorageFileCopy.csv");
     private final static Path mainPath = fileBackedTasksManager.getPath();
-       private InMemoryTaskManager inMemoryTaskManager = new InMemoryTaskManager();
-    private static KVServer kvServer;
 
     FileBackedTasksManagerTest() {
         super(fileBackedTasksManager);
@@ -67,8 +62,6 @@ class FileBackedTasksManagerTest extends TaskManagerTest<InMemoryTaskManager> {
         historyExpectedArray = new Task[]{tasksExpectedArray[1], tasksExpectedArray[2],
                 tasksExpectedArray[0], tasksExpectedArray[6]};
         Files.createFile(copyPath);
-            kvServer = new KVServer();
-            kvServer.start();
     }
 
     @Test
@@ -106,11 +99,10 @@ class FileBackedTasksManagerTest extends TaskManagerTest<InMemoryTaskManager> {
         fileBackedTasksManager.retrieveTaskById(3);
         fileBackedTasksManager.retrieveTaskById(1);
         fileBackedTasksManager.retrieveTaskById(7);
-        inMemoryTaskManager.clearTaskList();
         fileBackedTasksManager.loadFromStorage();
         fileBackedTasksManager.retrieveCompleteList().toArray(taskLoadedFormFileArray);
-        Task[] historyLoadedArray = new Task[Manager.getDefaultHistory().getHistory().size()];
-        Manager.getDefaultHistory().getHistory().toArray(historyLoadedArray);
+        Task[] historyLoadedArray = new Task[fileBackedTasksManager.getInMemoryHistoryManager().getHistory().size()];
+        fileBackedTasksManager.getInMemoryHistoryManager().getHistory().toArray(historyLoadedArray);
 
         assertArrayEquals(tasksExpectedArray, taskLoadedFormFileArray, "Считанный список событий изменен");
         assertArrayEquals(historyExpectedArray, historyLoadedArray, "Считанная история изменена");
@@ -141,10 +133,9 @@ class FileBackedTasksManagerTest extends TaskManagerTest<InMemoryTaskManager> {
         fileBackedTasksManager.createTask(subtask2);
         fileBackedTasksManager.createTask(subtask3);
         fileBackedTasksManager.createTask(epic2);
-        inMemoryTaskManager.clearTaskList();
         fileBackedTasksManager.loadFromStorage();
         fileBackedTasksManager.retrieveCompleteList().toArray(taskLoadedFormFileArray);
-        history = Manager.getDefaultHistory().getHistory();
+        history = fileBackedTasksManager.getInMemoryHistoryManager().getHistory();
 
         assertArrayEquals(tasksExpectedArray, taskLoadedFormFileArray, "Считанный список событий изменен");
         assertTrue(history.isEmpty(), "Список истории не пустой");
@@ -154,6 +145,5 @@ class FileBackedTasksManagerTest extends TaskManagerTest<InMemoryTaskManager> {
     static void recoverTestFileAndPath() throws IOException {
         Files.deleteIfExists(copyPath);
         fileBackedTasksManager.setPath(mainPath);
-            kvServer.stop();
     }
 }

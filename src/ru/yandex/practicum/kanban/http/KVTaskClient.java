@@ -12,14 +12,6 @@ public class KVTaskClient {
     private final URL url;
     private String apiToken;
 
-    public URL getUrl() {
-        return url;
-    }
-
-    public String getApiToken() {
-        return apiToken;
-    }
-
     public KVTaskClient(URL url) {
         this.client = HttpClient.newHttpClient();
         this.url = url;
@@ -46,6 +38,10 @@ public class KVTaskClient {
                     "Проверьте, пожалуйста, адрес и повторите попытку.");
             throw new RuntimeException(e);
         }
+    }
+
+    public String getApiToken() {
+        return apiToken;
     }
 
     public void put (String key, String json) {

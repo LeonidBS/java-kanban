@@ -2,6 +2,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.kanban.http.HttpTaskServer;
 import ru.yandex.practicum.kanban.http.KVServer;
@@ -17,15 +18,13 @@ import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class HttpTaskServerTest {
-    private HttpTaskManager httpTaskManager = new HttpTaskManager();
+    private static HttpTaskManager httpTaskManager;
     private static KVServer kvServer;
     private static HttpTaskServer httpTaskServer;
     private static final Task[] tasksExpectedArray = new Task[7];
-    private static Task[] historyExpectedArray = new Task[4];
 
     @BeforeAll
     static void beforeAll() throws IOException {
@@ -57,17 +56,20 @@ class HttpTaskServerTest {
         epic = new Epic(7, "Epic 2 from file", "Details Epic 2 from file",
                 TaskStatus.NEW, new ArrayList<>());
         tasksExpectedArray[6] = epic;
-        historyExpectedArray = new Task[]{tasksExpectedArray[1], tasksExpectedArray[2],
-                tasksExpectedArray[0], tasksExpectedArray[6]};
         kvServer = new KVServer();
         kvServer.start();
-        httpTaskServer = new HttpTaskServer();
+        httpTaskManager = Manager.getDefault();
+        httpTaskServer = new HttpTaskServer(httpTaskManager);
         httpTaskServer.start();
+    }
+
+    @BeforeEach
+    void clearTaskList() {
+        httpTaskManager.clearTaskList();
     }
 
     @Test
     void getTaskShouldReturnAllSimpleTasks() throws IOException, InterruptedException {
-        httpTaskManager.clearTaskList();
         List<Task> taskExpectedList = Arrays.asList(tasksExpectedArray[0], tasksExpectedArray[1]);
         List<Task> taskTestedList = new ArrayList<>();
         Task task1 = new Task("Task 1 from file", "Details Task 1 from file",
@@ -97,7 +99,6 @@ class HttpTaskServerTest {
     @Test
     void getSubtaskShouldReturnAllSubtasks() throws IOException, InterruptedException {
         List<Task> subtaskExpectedList = Arrays.asList(tasksExpectedArray[3], tasksExpectedArray[4]);
-        httpTaskManager.clearTaskList();
         List<Subtask> subtaskTestedList = new ArrayList<>();
         Task task1 = new Task("Task 1 from file", "Details Task 1 from file",
                 LocalDateTime.parse("2023-02-01T08:00"), 1800);
@@ -133,7 +134,6 @@ class HttpTaskServerTest {
 
     @Test
     void getEpicsShouldReturnAllEpics() throws IOException, InterruptedException {
-        httpTaskManager.clearTaskList();
         List<Epic> epicTestedList = new ArrayList<>();
         List<Task> epicExpectedList = Arrays.asList(tasksExpectedArray[2], tasksExpectedArray[6]);
         Task task1 = new Task("Task 1 from file", "Details Task 1 from file",
@@ -175,7 +175,6 @@ class HttpTaskServerTest {
 
     @Test
     void getTaskByIdShouldReturnSimpleTaskById() throws IOException, InterruptedException {
-        httpTaskManager.clearTaskList();
         Task taskTested;
         Task taskExpected = tasksExpectedArray[0];
         Task task1 = new Task("Task 1 from file", "Details Task 1 from file",
@@ -202,7 +201,6 @@ class HttpTaskServerTest {
 
     @Test
     void getSubtaskByIdShouldReturnSubtaskById() throws IOException, InterruptedException {
-        httpTaskManager.clearTaskList();
         Subtask subtaskExpected = (Subtask) tasksExpectedArray[3];
         Subtask subtaskTested;
         Task task1 = new Task("Task 1 from file", "Details Task 1 from file",
@@ -237,7 +235,6 @@ class HttpTaskServerTest {
 
     @Test
     void getEpicByIdShouldReturnEpicById() throws IOException, InterruptedException {
-        httpTaskManager.clearTaskList();
         Epic epicTested;
         Epic epicExpected = (Epic) tasksExpectedArray[2];
         Task task1 = new Task("Task 1 from file", "Details Task 1 from file",
@@ -277,7 +274,6 @@ class HttpTaskServerTest {
 
     @Test
     void getHistoryShouldReturnListOfHistoryTasks() throws IOException, InterruptedException {
-        httpTaskManager.clearTaskList();
         List<Task> testedHistory = new ArrayList<>();
         List<Task> expectedHistory = Arrays.asList(tasksExpectedArray[0],
                 tasksExpectedArray[2], tasksExpectedArray[4]);
@@ -332,7 +328,6 @@ class HttpTaskServerTest {
     @Test
     void getSubtaskByEpicIdShouldReturnSubtaskByEpicId() throws IOException, InterruptedException {
         List<Task> subtaskExpectedList = Arrays.asList(tasksExpectedArray[3], tasksExpectedArray[4]);
-        httpTaskManager.clearTaskList();
         List<Subtask> subtaskTestedList = new ArrayList<>();
         Task task1 = new Task("Task 1 from file", "Details Task 1 from file",
                 LocalDateTime.parse("2023-02-01T08:00"), 1800);
@@ -369,8 +364,7 @@ class HttpTaskServerTest {
 
     @Test
     void createTaskShouldReturnNewTask() throws IOException, InterruptedException {
-        httpTaskManager.clearTaskList();
-        Task expectedTask = new Task(1, "Task 1 from file", "Details Task 1 from file",
+           Task expectedTask = new Task(1, "Task 1 from file", "Details Task 1 from file",
                 TaskStatus.NEW, TaskType.SIMPLE_TASK, LocalDateTime.parse("2023-02-01T08:00"),
                 LocalDateTime.parse("2023-02-02T14:00"), 1800);
         Task task = new Task("Task 1 from file", "Details Task 1 from file",
@@ -393,14 +387,13 @@ class HttpTaskServerTest {
 
     @Test
     void createSubtaskShouldReturnNewSubtask() throws IOException, InterruptedException {
-        httpTaskManager.clearTaskList();
         Epic epic = new Epic("Epic 1 from file", "Details Epic 1 from file");
-        httpTaskManager.createTask(epic);
+       int epicId = httpTaskManager.createTask(epic);
         Subtask expectedSubtask = new Subtask(2, "Subtask 1 from file", "Details Subtask 1 from file",
-                TaskStatus.NEW, 1, LocalDateTime.parse("2023-02-09T11:00"),
+                TaskStatus.NEW, epicId, LocalDateTime.parse("2023-02-09T11:00"),
                 LocalDateTime.parse("2023-02-10T02:00"), 900);
         Subtask subtask = new Subtask("Subtask 1 from file", "Details Subtask 1 from file",
-                1, LocalDateTime.parse("2023-02-09T11:00"), 900);
+                epicId, LocalDateTime.parse("2023-02-09T11:00"), 900);
         String json = Manager.getGson().toJson(subtask);
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -419,7 +412,6 @@ class HttpTaskServerTest {
 
     @Test
     void createEpicShouldReturnNewEpic() throws IOException, InterruptedException {
-        httpTaskManager.clearTaskList();
         Epic expectedEpic = new Epic(1, "Epic 1 from file", "Details Epic 1 from file",
                 TaskStatus.NEW, new ArrayList<>());
         Epic epic = new Epic("Epic 1 from file", "Details Epic 1 from file");
@@ -442,7 +434,6 @@ class HttpTaskServerTest {
 
     @Test
     void updateTaskShouldReturnUpdatedTask() throws IOException, InterruptedException {
-        httpTaskManager.clearTaskList();
         Task expectedTask = new Task(1, "Task 1 from file", "Details Task 1 from file",
                 TaskStatus.DONE, TaskType.SIMPLE_TASK, LocalDateTime.parse("2023-02-01T08:00"),
                 LocalDateTime.parse("2023-02-02T14:00"), 1800);
@@ -467,7 +458,6 @@ class HttpTaskServerTest {
 
     @Test
     void updateSubtaskShouldReturnUpdatedSubtask() throws IOException, InterruptedException {
-        httpTaskManager.clearTaskList();
         Epic epic = new Epic("Epic 1 from file", "Details Epic 1 from file");
         httpTaskManager.createTask(epic);
         Subtask expectedSubtask = new Subtask(2, "Subtask 1 from file", "Details Subtask 1 from file",
@@ -496,8 +486,7 @@ class HttpTaskServerTest {
 
     @Test
     void updateEpicShouldReturnUpdatedEpic() throws IOException, InterruptedException {
-        httpTaskManager.clearTaskList();
-        Epic expectedEpic = new Epic(1, "UPDATED HTTP Epic 1 from file", "Details Epic 1 from file",
+         Epic expectedEpic = new Epic(1, "UPDATED HTTP Epic 1 from file", "Details Epic 1 from file",
                 TaskStatus.NEW, new ArrayList<>());
         Epic epic = new Epic("Epic 1 from file", "Details Epic 1 from file");
         httpTaskManager.createTask(epic);
@@ -519,7 +508,6 @@ class HttpTaskServerTest {
 
     @Test
     void deleteTaskByIdShouldNotReturnSiDeletedTaskById() throws IOException, InterruptedException {
-        httpTaskManager.clearTaskList();
         Task task1 = new Task("Task 1 from file", "Details Task 1 from file",
                 LocalDateTime.parse("2023-02-01T08:00"), 1800);
         httpTaskManager.createTask(task1);
@@ -536,7 +524,7 @@ class HttpTaskServerTest {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         assertEquals(task,tasksExpectedArray[0], "Задача не создана");
-        assertTrue(!taskList.isEmpty(), "Список пуст до удаления" );
+        assertFalse(taskList.isEmpty(), "Список пуст до удаления");
         assertEquals(response.statusCode(), 200, "Не получено подтвреждение ответа от сервера");
         assertTrue(httpTaskManager.retrieveAllTasks().isEmpty(), "Задача не удалена");
     }
@@ -545,39 +533,27 @@ class HttpTaskServerTest {
     void deleteSubtaskByIdShouldNotReturnSiDeletedSubtaskById() throws IOException, InterruptedException {
         httpTaskManager.clearTaskList();
         Epic epic = new Epic("Epic 1 from file", "Details Epic 1 from file");
-        httpTaskManager.createTask(epic);
+        int epicId = httpTaskManager.createTask(epic);
         Subtask subtask = new Subtask("Subtask 1 from file", "Details Subtask 1 from file",
-                1, LocalDateTime.parse("2023-02-09T11:00"), 900);
+                epicId, LocalDateTime.parse("2023-02-09T11:00"), 900);
         httpTaskManager.createTask(subtask);
         Subtask subtaskExpected = new Subtask(2, "Subtask 1 from file", "Details Subtask 1 from file",
                 TaskStatus.NEW,1,  LocalDateTime.parse("2023-02-09T11:00"), 900);
-        Epic epicInList = (Epic) httpTaskManager.retrieveTaskById(1);
+
+        List<Subtask> subtaskList = httpTaskManager.retrieveSubtasks(epicId);
         Subtask subtaskInList = (Subtask) httpTaskManager.retrieveTaskById(2);
-        List<Task> taskList = httpTaskManager.retrieveCompleteList();
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest requestDeleteSubtask = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/tasks/task/?id=1"))
-                .header("Accept", "application/json")
-                .version(HttpClient.Version.HTTP_1_1)
-                .DELETE()
-                .build();
-
-        HttpResponse<String> responseDeleteSubtask = client.send(requestDeleteSubtask,
-                HttpResponse.BodyHandlers.ofString());
-
-        HttpRequest requestDeleteEpic = HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:8080/tasks/task/?id=2"))
                 .header("Accept", "application/json")
                 .version(HttpClient.Version.HTTP_1_1)
                 .DELETE()
                 .build();
-
-
-        HttpResponse<String> responseDeleteEpic = client.send(requestDeleteEpic,
+        HttpResponse<String> responseDeleteSubtask = client.send(requestDeleteSubtask,
                 HttpResponse.BodyHandlers.ofString());
 
         assertEquals(subtaskInList, subtaskExpected, "Задача не создана");
-        assertTrue(!taskList.isEmpty(), "Список пуст до удаления" );
+        assertFalse(subtaskList.isEmpty(), "Список пуст до удаления");
         assertEquals(responseDeleteSubtask.statusCode(), 200,
                 "Не получено подтвреждение ответа от сервера");
         assertTrue(httpTaskManager.retrieveAllTasks().isEmpty(), "Задача не удалена");
@@ -585,7 +561,6 @@ class HttpTaskServerTest {
 
     @Test
     void deleteEpicByIdShouldNotReturnSiDeletedTEpicById() throws IOException, InterruptedException {
-        httpTaskManager.clearTaskList();
         Epic epic = new Epic("Task 1 from file", "Details Task 1 from file");
         httpTaskManager.createTask(epic);
         Epic epicExpected = new Epic(1,"Task 1 from file", "Details Task 1 from file",
@@ -603,14 +578,13 @@ class HttpTaskServerTest {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         assertEquals(epicTested, epicExpected, "Задача не создана");
-        assertTrue(!taskList.isEmpty(), "Список пуст до удаления");
+        assertFalse(taskList.isEmpty(), "Список пуст до удаления");
         assertEquals(response.statusCode(), 200, "Не получено подтвреждение ответа от сервера");
         assertTrue(httpTaskManager.retrieveAllTasks().isEmpty(), "Задача не удалена");
     }
 
     @Test
-    void deleteAllTaskShouldReturnEpmptyListOfTasks() throws IOException, InterruptedException {
-        httpTaskManager.clearTaskList();
+    void deleteAllTaskShouldReturnEmptyListOfTasks() throws IOException, InterruptedException {
         Task task1 = new Task("Task 1 from file", "Details Task 1 from file",
                 LocalDateTime.parse("2023-02-01T08:00"), 1800);
         httpTaskManager.createTask(task1);
@@ -627,16 +601,13 @@ class HttpTaskServerTest {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         assertEquals(task,tasksExpectedArray[0], "Задача не создана");
-        assertTrue(!taskList.isEmpty(), "Список пуст до удаления" );
+        assertFalse(taskList.isEmpty(), "Список пуст до удаления");
         assertEquals(response.statusCode(), 200, "Не получено подтвреждение ответа от сервера");
         assertTrue(httpTaskManager.retrieveAllTasks().isEmpty(), "Задача не удалена");
     }
 
     @Test
     void retrievePrioritizingList() throws IOException, InterruptedException {
-        List<Task> allTasks = new ArrayList<>();
-            httpTaskManager.clearTaskList();
-            List<Subtask> subtaskTestedList = new ArrayList<>();
             Task task1 = new Task("Task 1 from file", "Details Task 1 from file",
                     LocalDateTime.parse("2023-02-01T08:00"), 1800);
             httpTaskManager.createTask(task1);
@@ -660,7 +631,6 @@ class HttpTaskServerTest {
                     .version(HttpClient.Version.HTTP_1_1)
                     .GET()
                     .build();
-            int totalDuration = 0;
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             JsonElement jsonElement = JsonParser.parseString(response.body());
         for (Map.Entry<String, JsonElement> stringJsonElementEntry : jsonElement.getAsJsonObject().entrySet()) {

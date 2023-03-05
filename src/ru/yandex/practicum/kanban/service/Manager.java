@@ -9,29 +9,23 @@ import ru.yandex.practicum.kanban.service.adapter.EpicAdapter;
 import ru.yandex.practicum.kanban.service.adapter.SubtaskAdapter;
 import ru.yandex.practicum.kanban.service.adapter.TaskAdapter;
 
-import java.net.MalformedURLException;
-import java.time.LocalDateTime;
-
 public class Manager {
-    private static HttpTaskManager httpTaskManager = new HttpTaskManager();
-    private static InMemoryTaskManager inMemoryTaskManager = new InMemoryTaskManager();
-    private static FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager();
-    private static InMemoryHistoryManager inMemoryHistoryManager = new InMemoryHistoryManager();
+    private static final HttpTaskManager httpTaskManager = new HttpTaskManager();
 
-    public static TaskManager getDefault() {
+    public static HttpTaskManager getDefault() {
         return httpTaskManager;
     }
 
-    public static TaskManager getInMemoryTask() {
-        return inMemoryTaskManager;
+    public static InMemoryTaskManager getInMemoryTask() {
+        return new InMemoryTaskManager();
     }
 
-    public static TaskManager getFileBacked() {
-        return fileBackedTasksManager;
+    public static FileBackedTasksManager getFileBacked() {
+        return new FileBackedTasksManager();
     }
 
     public static HistoryManager getDefaultHistory() {
-        return inMemoryHistoryManager;
+        return new InMemoryHistoryManager();
     }
 
     public static Gson getGson() {

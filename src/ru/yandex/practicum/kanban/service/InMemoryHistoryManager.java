@@ -1,8 +1,8 @@
 package ru.yandex.practicum.kanban.service;
 
-import ru.yandex.practicum.kanban.service.exceptions.IdPassingException;
 import ru.yandex.practicum.kanban.model.Node;
 import ru.yandex.practicum.kanban.model.Task;
+import ru.yandex.practicum.kanban.service.exceptions.IdPassingException;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -1,8 +1,8 @@
 package ru.yandex.practicum.kanban.service;
 
+import ru.yandex.practicum.kanban.model.*;
 import ru.yandex.practicum.kanban.service.exceptions.IdPassingException;
 import ru.yandex.practicum.kanban.service.exceptions.ManagerSaveException;
-import ru.yandex.practicum.kanban.model.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,8 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
-    private static Path path = Paths.get("resources\\TasksStorageFile.csv");
-    private final static String title = "id,type,name,status,details,special";
+    private Path path = Paths.get("resources\\TasksStorageFile.csv");
 
     public static void main(String[] args) {
         FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager();
@@ -92,7 +91,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     fileBackedTasksManager.retrieveTaskById(13);
 
                 } else if (command == 3) {
-                    System.out.println(Manager.getDefaultHistory().printHistory());
+                    System.out.println(fileBackedTasksManager.getInMemoryHistoryManager().printHistory());
                 } else if (command == 4) {
                     System.out.println("Введите номер задачи");
                     int idDelete = scanner.nextInt();
@@ -107,7 +106,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     System.out.println("Введите месяц (число от 1 -12):");
                     int month = scanner.nextInt();
                     for (Map.Entry<LocalDateTime, Task> entry :
-                            Manager.getInMemoryTask().getTimeSlotMap().entrySet()) {
+                            fileBackedTasksManager.getTimeSlotMap().entrySet()) {
                         if (entry.getKey().getMonthValue() == month && entry.getKey().getYear() == year) {
                             String taskInTable;
                             if (entry.getValue() != null) {
@@ -124,7 +123,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             e.printStackTrace();
             System.out.println("Введите числовое значение из меню");
         }
-          }
+    }
 
     public void loadFromStorage() {
         List<String> taskLines;
@@ -149,11 +148,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 }
             }
             if (!taskListFromFile.get(true).isEmpty()) {
-                       String[] historyString = taskListFromFile.get(true).get(0).split(",");
-                    for (int i = 0; i < historyString.length; i++) {
-                        Task task = retrieveTaskById(Integer.parseInt(historyString[i]));
-                        Manager.getDefaultHistory().add(task);
-                 }
+                String[] historyString = taskListFromFile.get(true).get(0).split(",");
+                for (String s : historyString) {
+                    Task task = retrieveTaskById(Integer.parseInt(s));
+                    getInMemoryHistoryManager().add(task);
+                }
             }
 
         } catch (IOException e) {
@@ -162,7 +161,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
     }
 
-    public static Task fromString(String value) {
+    public Task fromString(String value) {
         String[] splitedTaskLine = value.split(",");
         int firstIndexName = value.indexOf(splitedTaskLine[2]) + 1;
         int lastIndexName = 0;
@@ -178,8 +177,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
 
         int id = Integer.parseInt(splitedTaskLine[0]);
-        if (id > InMemoryTaskManager.getIdWithoutIncrement()) {
-            InMemoryTaskManager.setId(id);
+        if (id > getIdWithoutIncrement()) {
+            setId(id);
         }
         int duration = 0;
         String stringStartTime = splitedTaskLine[splitedTaskLine.length - 3];
@@ -250,7 +249,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     public void setPath(Path path) {
-        FileBackedTasksManager.path = path;
+        this.path = path;
     }
 
     public void save() {
@@ -258,11 +257,12 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 .map(Task::toStringInFile)
                 .collect(Collectors.toList());
 
-        if (Manager.getDefaultHistory().getHistory().size() > 0) {
+        if (getInMemoryHistoryManager().getHistory().size() > 0) {
             taskLines.add("");
-            taskLines.add(Manager.getDefaultHistory().historyToString());
+            taskLines.add(getInMemoryHistoryManager().historyToString());
         }
         try {
+            String title = "id,type,name,status,details,special";
             Files.writeString(path, title + "\n");
             for (String taskLine : taskLines) {
                 Files.writeString(path, taskLine + "\n", StandardOpenOption.APPEND);

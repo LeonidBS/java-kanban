@@ -7,9 +7,8 @@ import ru.yandex.practicum.kanban.model.Endpoint;
 import ru.yandex.practicum.kanban.model.Epic;
 import ru.yandex.practicum.kanban.model.Subtask;
 import ru.yandex.practicum.kanban.model.Task;
-import ru.yandex.practicum.kanban.service.HistoryManager;
+import ru.yandex.practicum.kanban.service.HttpTaskManager;
 import ru.yandex.practicum.kanban.service.Manager;
-import ru.yandex.practicum.kanban.service.TaskManager;
 import ru.yandex.practicum.kanban.service.exceptions.IdPassingException;
 import ru.yandex.practicum.kanban.service.exceptions.SubtaskCreationException;
 import ru.yandex.practicum.kanban.service.exceptions.TimeSlotException;
@@ -29,14 +28,10 @@ public class HttpTaskServer {
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     private final Gson gson;
     private final HttpServer server;
+    private final HttpTaskManager httpTaskManager;
 
-
-    private final TaskManager taskManager;
-    private final HistoryManager historyManager;
-
-    public HttpTaskServer() throws IOException {
-        this.taskManager = Manager.getFileBacked();
-        this.historyManager = Manager.getDefaultHistory();
+    public HttpTaskServer(HttpTaskManager httpTaskManager) throws IOException {
+        this.httpTaskManager = httpTaskManager;
         gson = Manager.getGson();
         server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
         server.createContext("/tasks", this::handleCommon);
@@ -52,17 +47,12 @@ public class HttpTaskServer {
                     exchange.getRequestMethod(), Optional.empty(), query);
             switch (endpoint) {
                 case GET_HISTORY: {
-//                    List<Task> listTasks = historyManager.getHistory();
-//                    String responseString ="";
-//                    for (Task listTask : listTasks) {
-//                        responseString +=
-//                    }
-                    String responseString = gson.toJson(historyManager.getHistory());
+                    String responseString = gson.toJson(httpTaskManager.getInMemoryHistoryManager().getHistory());
                     writeResponse(exchange, responseString, 200);
                     break;
                 }
                 case GET_PRIORITIZED_TASKS: {
-                    String responseString = gson.toJson(taskManager.getTimeSlotMap());
+                    String responseString = gson.toJson(httpTaskManager.getTimeSlotMap());
                     writeResponse(exchange, responseString, 200);
                     break;
                 }
@@ -86,39 +76,39 @@ public class HttpTaskServer {
                     exchange.getRequestMethod(), optionalTask, query);
             switch (endpoint) {
                 case GET_TASK_ID: {
-                    String responseString = gson.toJson(taskManager
+                    String responseString = gson.toJson(httpTaskManager
                             .retrieveTaskById(Integer.parseInt(query
                                     .replaceFirst("id=", ""))));
                     writeResponse(exchange, responseString, 200);
                     break;
                 }
                 case GET_TASKS: {
-                    String responseString = gson.toJson(taskManager.retrieveAllTasks());
+                    String responseString = gson.toJson(httpTaskManager.retrieveAllTasks());
                     writeResponse(exchange, responseString, 200);
                     break;
                 }
                 case POST_CREATE_TASK: {
                     if (optionalTask.isPresent()) {
-                        taskManager.createTask(optionalTask.get());
+                        httpTaskManager.createTask(optionalTask.get());
                         exchange.sendResponseHeaders(200, 0);
                         break;
                     }
                 }
                 case POST_UPDATE_TASK: {
                     if (optionalTask.isPresent()) {
-                        taskManager.updateTask(optionalTask.get());
+                        httpTaskManager.updateTask(optionalTask.get());
                         exchange.sendResponseHeaders(200, 0);
                         break;
                     }
                 }
                 case DELETE_TASK_ID: {
-                    taskManager.deleteTask(Integer.parseInt(query
+                    httpTaskManager.deleteTask(Integer.parseInt(query
                             .replaceFirst("id=", "")));
                     exchange.sendResponseHeaders(200, 0);
                     break;
                 }
                 case DELETE_TASKS: {
-                    taskManager.clearTaskList();
+                    httpTaskManager.clearTaskList();
                     exchange.sendResponseHeaders(200, 0);
                     break;
                 }
@@ -146,46 +136,46 @@ public class HttpTaskServer {
                     exchange.getRequestMethod(), optionalTask, query);
             switch (endpoint) {
                 case GET_TASK_ID: {
-                    String responseString = gson.toJson(taskManager
+                    String responseString = gson.toJson(httpTaskManager
                             .retrieveTaskById(Integer.parseInt(query
                                     .replaceFirst("id=", ""))));
                     writeResponse(exchange, responseString, 200);
                     break;
                 }
                 case GET_SUBTASKS: {
-                    String responseString = gson.toJson(taskManager.retrieveAllSubtasks());
+                    String responseString = gson.toJson(httpTaskManager.retrieveAllSubtasks());
                     writeResponse(exchange, responseString, 200);
                     break;
                 }
                 case POST_CREATE_SUBTASK: {
                     if (optionalTask.isPresent()) {
-                        taskManager.createTask((Subtask) optionalTask.get());
+                        httpTaskManager.createTask((Subtask) optionalTask.get());
                         exchange.sendResponseHeaders(200, 0);
                         break;
                     }
                 }
                 case POST_UPDATE_SUBTASK: {
                     if (optionalTask.isPresent()) {
-                        taskManager.updateTask((Subtask) optionalTask.get());
+                        httpTaskManager.updateTask((Subtask) optionalTask.get());
                         exchange.sendResponseHeaders(200, 0);
                         break;
                     }
                 }
                 case GET_EPIC_SUBTASKS: {
-                    String responseString = gson.toJson(taskManager
+                    String responseString = gson.toJson(httpTaskManager
                             .retrieveSubtasks(Integer.parseInt(query
                                     .replaceFirst("id=", ""))));
                     writeResponse(exchange, responseString, 200);
                     break;
                 }
                 case DELETE_TASK_ID: {
-                    taskManager.deleteTask(Integer.parseInt(query
+                    httpTaskManager.deleteTask(Integer.parseInt(query
                             .replaceFirst("id=", "")));
                     exchange.sendResponseHeaders(200, 0);
                     break;
                 }
                 case DELETE_TASKS: {
-                    taskManager.clearTaskList();
+                    httpTaskManager.clearTaskList();
                     exchange.sendResponseHeaders(200, 0);
                     break;
                 }
@@ -215,39 +205,39 @@ public class HttpTaskServer {
                     exchange.getRequestMethod(), optionalTask, query);
             switch (endpoint) {
                 case GET_TASK_ID: {
-                    String responseString = gson.toJson(taskManager
+                    String responseString = gson.toJson(httpTaskManager
                             .retrieveTaskById(Integer.parseInt(query
                                     .replaceFirst("id=", ""))));
                     writeResponse(exchange, responseString, 200);
                     break;
                 }
                 case GET_EPICS: {
-                    String responseString = gson.toJson(taskManager.retrieveAllEpics());
+                    String responseString = gson.toJson(httpTaskManager.retrieveAllEpics());
                     writeResponse(exchange, responseString, 200);
                     break;
                 }
                 case POST_CREATE_EPIC: {
                     if (optionalTask.isPresent()) {
-                        taskManager.createTask((Epic) optionalTask.get());
+                        httpTaskManager.createTask((Epic) optionalTask.get());
                         exchange.sendResponseHeaders(200, 0);
                         break;
                     }
                 }
                 case POST_UPDATE_EPIC: {
                     if (optionalTask.isPresent()) {
-                        taskManager.updateTask((Epic) optionalTask.get());
+                        httpTaskManager.updateTask((Epic) optionalTask.get());
                         exchange.sendResponseHeaders(200, 0);
                         break;
                     }
                 }
                 case DELETE_TASK_ID: {
-                    taskManager.deleteTask(Integer.parseInt(query
+                    httpTaskManager.deleteTask(Integer.parseInt(query
                             .replaceFirst("id=", "")));
                     exchange.sendResponseHeaders(200, 0);
                     break;
                 }
                 case DELETE_TASKS: {
-                    taskManager.clearTaskList();
+                    httpTaskManager.clearTaskList();
                     exchange.sendResponseHeaders(200, 0);
                     break;
                 }

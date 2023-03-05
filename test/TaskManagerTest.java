@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static ru.yandex.practicum.kanban.service.InMemoryTaskManager.putTaskToMapFormFile;
 
 public abstract class TaskManagerTest<T extends TaskManager> {
     private final T taskManager;
@@ -24,36 +23,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     public TaskManagerTest(T taskManager) {
         this.taskManager = taskManager;
-    }
-
-    @Test
-    void retrieveTaskByIdTestShouldReturnSameTaskEpicSubtaskWhichAreCreatedByConstructor() {
-        taskManager.clearTaskList();
-        List<Integer> subtaskList = Arrays.asList(2, 3);
-        Epic epic = new Epic(1, "TestEpic", "DetailTestEpic",
-                TaskStatus.IN_PROGRESS, subtaskList);
-        Subtask subtask1 = new Subtask(2, "TestSubtask1", "DetailSubtask1",
-                TaskStatus.NEW, 1, LocalDateTime.parse("2023-02-09T05:00"), 900);
-        Subtask subtask2 = new Subtask(3, "TestSubtask2", "DetailSubtask2",
-                TaskStatus.DONE, 1, LocalDateTime.parse("2023-02-12T12:00"), 930);
-        Task task = new Task(4, "TestTask", "DetailTestTask",
-                TaskStatus.NEW, LocalDateTime.parse("2023-02-20T16:00"), 1500);
-
-        InMemoryTaskManager.putTaskToMapFormFile(epic);
-        putTaskToMapFormFile(subtask1);
-        putTaskToMapFormFile(subtask2);
-        InMemoryTaskManager.putTaskToMapFormFile(task);
-        Epic savedEpic = (Epic) taskManager.retrieveTaskById(1);
-        Subtask savedSubtask1 = (Subtask) taskManager.retrieveTaskById(2);
-        Subtask savedSubtask2 = (Subtask) taskManager.retrieveTaskById(3);
-        Task savedTask = taskManager.retrieveTaskById(4);
-
-        assertEquals(epic, savedEpic, "После записи и считавания эпик не сопадает");
-        assertEquals(subtask1, savedSubtask1, "После записи и считавания подзадача не сопадает");
-        assertEquals(subtask2, savedSubtask2, "После записи и считавания подзадача не сопадает");
-        assertEquals(task, savedTask, "После записи и считавания задача не сопадает");
-
-        taskManager.clearTaskList();
     }
 
     @Test
@@ -525,6 +494,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         assertNotNull(testedSubtaskList, "Список подзадач не получен");
         assertEquals(expectedSubtaskList, testedSubtaskList, "Список подзадач не соответствует заданному");
-      }
+    }
 
 }
