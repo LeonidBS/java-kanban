@@ -1,12 +1,11 @@
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.kanban.service.exceptions.IdPassingException;
 import ru.yandex.practicum.kanban.model.Epic;
 import ru.yandex.practicum.kanban.model.Task;
 import ru.yandex.practicum.kanban.model.TaskStatus;
 import ru.yandex.practicum.kanban.model.TaskType;
 import ru.yandex.practicum.kanban.service.InMemoryHistoryManager;
 import ru.yandex.practicum.kanban.service.InMemoryTaskManager;
-import ru.yandex.practicum.kanban.service.Manager;
+import ru.yandex.practicum.kanban.service.exceptions.IdPassingException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -99,7 +98,7 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    void removeMethodShouldThrowExceptionWhenIdisNotExist() {
+    void removeMethodShouldThrowExceptionWhenIdIsNotExist() {
         inMemoryHistoryManager.clearHistory();
 
         IdPassingException idPassingException = assertThrows(IdPassingException.class,

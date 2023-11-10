@@ -1,12 +1,11 @@
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
-import ru.yandex.practicum.kanban.service.InMemoryTaskManager;
+import ru.yandex.practicum.kanban.model.*;
+import ru.yandex.practicum.kanban.service.TaskManager;
 import ru.yandex.practicum.kanban.service.exceptions.IdPassingException;
 import ru.yandex.practicum.kanban.service.exceptions.SubtaskCreationException;
 import ru.yandex.practicum.kanban.service.exceptions.TimeSlotException;
 import ru.yandex.practicum.kanban.service.exceptions.UpdateTaskException;
-import ru.yandex.practicum.kanban.model.*;
-import ru.yandex.practicum.kanban.service.TaskManager;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -462,10 +461,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = new Epic("Epic Test clearTaskListTest",
                 "Epic Details for Test clearTaskListTest");
         final int idNewEpic = taskManager.createTask(epic);
-        Subtask subtask = new Subtask("Subtask Test clearTaskListTest",
+        new Subtask("Subtask Test clearTaskListTest",
                 "Subtask Details for Test clearTaskListTest", idNewEpic,
                 LocalDateTime.parse("2023-02-21T11:00"), 3300);
-        Task task = new Task("Task Test clearTaskListTest",
+        new Task("Task Test clearTaskListTest",
                 "Task Details for Test clearTaskListTest",
                 LocalDateTime.parse("2023-02-24T12:00"), 930);
 
@@ -483,11 +482,11 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtask1 = new Subtask("Test deleteSubtaskTest",
                 "Details for Test deleteSubtaskTest", idNewEpic,
                 LocalDateTime.parse("2023-02-21T18:00"), 3000);
-        final int newID1 = taskManager.createTask(subtask1);
+        taskManager.createTask(subtask1);
         Subtask subtask2 = new Subtask("Test deleteSubtaskTest",
                 "Details for Test deleteSubtaskTest", idNewEpic,
                 LocalDateTime.parse("2023-02-21T18:00"), 3000);
-        final int newID2 = taskManager.createTask(subtask2);
+        taskManager.createTask(subtask2);
         List<Subtask> expectedSubtaskList = Arrays.asList(subtask1, subtask2);
 
         List<Subtask> testedSubtaskList = taskManager.retrieveSubtasks(idNewEpic);
